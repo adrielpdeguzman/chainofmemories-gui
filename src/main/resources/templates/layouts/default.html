@@ -4,7 +4,8 @@
 	xmlns:th="http://www.thymeleaf.org">
 
 <head>
-<title>Chain of Memories</title>
+<title layout:title-pattern="$DECORATOR_TITLE - $CONTENT_TITLE">Chain
+	of Memories</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link
 	href="http://cdn.jsdelivr.net/webjars/bootstrap/3.3.6/css/bootstrap.min.css"
@@ -15,9 +16,13 @@
 </head>
 
 <body>
+	<div th:replace="fragments/header :: header"></div>
+
 	<div class="container">
-		Hello <span th:text="${name}"></span>!
+		<div layout:fragment="content"></div>
 	</div>
+
+	<div th:replace="fragments/footer :: footer"></div>
 
 	<script
 		src="http://cdn.jsdelivr.net/webjars/jquery/1.12.4/jquery.min.js"
