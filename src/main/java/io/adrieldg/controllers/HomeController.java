@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping("/")
 public class HomeController {
 
-	@RequestMapping(method = RequestMethod.GET)
-	String index(Model model) {
-		model.addAttribute("name", "Adriel");
-		return "index";
-	}
+  @RequestMapping(method = RequestMethod.GET)
+  String index(Model model) {
+    model.addAttribute("name", "Adriel");
+    return "index";
+  }
 }
