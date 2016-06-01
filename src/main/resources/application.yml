@@ -1,2 +1,7 @@
 server:
   port: 8080
+
+globals:
+  api-url: localhost:8081
+  client-id: chainofmemories-client
+  client-secret: keyblade

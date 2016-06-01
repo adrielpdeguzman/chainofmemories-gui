@@ -2,8 +2,11 @@ package io.adrieldg.controllers;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import io.adrieldg.models.User;
 
 @Controller
 @RequestMapping("/")
@@ -20,13 +23,13 @@ public class HomeController {
   }
 
   @RequestMapping(path = "/login", method = RequestMethod.POST)
-  String doLogin() {
+  String doLogin(@ModelAttribute User user) {
     return "login";
   }
 
   @RequestMapping(path = "/logut", method = RequestMethod.GET)
   String logout() {
-    return null;
+    return "login";
   }
 
   @RequestMapping(path = "/changelogs", method = RequestMethod.GET)
