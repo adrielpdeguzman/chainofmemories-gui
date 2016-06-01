@@ -11,7 +11,7 @@ public class HomeController {
 
 	@RequestMapping(method = RequestMethod.GET)
 	String index(Model model) {
-		model.addAttribute("name", "Monalice");
+		model.addAttribute("name", "Adriel");
 		return "index";
 	}
 }
