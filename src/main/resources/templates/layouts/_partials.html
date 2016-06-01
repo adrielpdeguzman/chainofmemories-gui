@@ -8,9 +8,50 @@
 </head>
 
 <body>
-  <nav th:fragment="nav">This is the nav</nav>
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed"
+          data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
+          aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span>
+          <span class="icon-bar"></span> <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/" th:href="@{~/}">Chain of Memories</a>
+      </div>
 
-  <footer th:fragment="footer">This is the footer</footer>
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <li class="dropdown"><a href="#" class="dropdown-toggle"
+            data-toggle="dropdown" role="button" aria-haspopup="true"
+            aria-expanded="false">Journals <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="#">Write Entry</a></li>
+              <li role="separator" class="divider"></li>
+              <li><a href="#">View Volumes</a></li>
+              <li><a href="#">Random Entry</a></li>
+              <li role="separator" class="divider"></li>
+              <li><a href="#">Search</a></li>
+            </ul></li>
+          <li><a href="/login" th:href="@{/login}">Sign In <span
+              class="sr-only">(current)</span></a></li>
+          <li><a href="/logout" th:href="@{/logout}">Sign Out <span
+              class="sr-only">(current)</span></a></li>
+        </ul>
+      </div>
+
+    </div>
+  </nav>
+
+  <footer th:fragment="footer" class="text-muted small">
+    <div class="pull-left">After all, love is all about timing</div>
+    <div class="pull-right">
+      2016&copy; <a href="https://www.facebook.com/adrielpdeguzman">Adriel</a>
+      &amp; <a href="https://www.facebook.com/monaliceperez">Monalice</a><br />
+      View <a href="/changelogs" th:href="@{/changelogs}">changelogs</a> </div>
+  </footer>
 </body>
 
 </html>
