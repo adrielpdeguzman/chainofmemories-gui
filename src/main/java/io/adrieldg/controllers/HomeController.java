@@ -30,7 +30,7 @@ public class HomeController {
 
   @RequestMapping(path = "/login", method = RequestMethod.POST)
   String doLogin(@ModelAttribute LoginCredentials loginCredentials, RedirectAttributes attr) {
-    homeService.doLogin(loginCredentials.getUsername(), loginCredentials.getPassword());
+    homeService.doLogin(loginCredentials);
     return "redirect:/";
   }
 
