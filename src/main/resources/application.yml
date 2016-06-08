@@ -1,17 +1,3 @@
-server:
-  port: 8080
-
-oauth2:
-  clientId: chainofmemories-client
-  clientSecret: keyblade
-  accessTokenUri: http://localhost:8081/oauth/token
-  grantType: password
-  client-authentication-scheme: header
-  id: chainofmemories
-  
-security:
-  basic:
-    enabled: false
-
-global:
-  api-url: http://localhost:8081/
+spring:
+  profiles:
+    active: dev
