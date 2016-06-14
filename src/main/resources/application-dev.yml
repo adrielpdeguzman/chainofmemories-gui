@@ -1,17 +1,12 @@
+global:
+  apiUrl: http://localhost:8081/
+
 server:
   port: 8080
 
-security:
-  oauth2:
-    client:
-      clientId: chainofmemories-client
-      clientSecret: keyblade
-      accessTokenUri: http://localhost:8081/oauth/token
-      grantType: password
-      id: chainofmemories
-      scope: read,write,trust
-    resource:
-      userInfoUri: http://localhost:8081/me
-
-global:
-  api-url: http://localhost:8081/
+oauth2:
+  clientId: chainofmemories-client
+  clientSecret: keyblade
+  accessTokenUri: oauth/token
+  grantType: password
+  scope: read,write,trust
