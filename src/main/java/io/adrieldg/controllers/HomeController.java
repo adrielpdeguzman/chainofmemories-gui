@@ -22,19 +22,19 @@ public class HomeController {
     return "index";
   }
 
-  @RequestMapping(path = "/login", method = RequestMethod.GET)
+  @RequestMapping(path = "login", method = RequestMethod.GET)
   String login(Model model) {
     model.addAttribute(new LoginCredentials());
     return "login";
   }
 
-  @RequestMapping(path = "/login", method = RequestMethod.POST)
+  @RequestMapping(path = "login", method = RequestMethod.POST)
   String doLogin(@ModelAttribute LoginCredentials loginCredentials, RedirectAttributes attr) {
     homeService.doLogin(loginCredentials);
     return "redirect:/";
   }
 
-  @RequestMapping(path = "/changelogs", method = RequestMethod.GET)
+  @RequestMapping(path = "changelogs", method = RequestMethod.GET)
   String changelogs() {
     return "changelogs";
   }

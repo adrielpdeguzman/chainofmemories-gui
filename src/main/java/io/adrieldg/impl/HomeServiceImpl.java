@@ -20,6 +20,9 @@ public class HomeServiceImpl implements HomeService {
     restTemplate.getOAuth2ClientContext().getAccessTokenRequest().set("password",
         loginCredentials.getPassword());
 
-    restTemplate.getAccessToken();
+    System.out
+        .println(restTemplate.getForObject("http://localhost:8081/me", String.class));
+
+    System.out.println("Test");
   }
 }
