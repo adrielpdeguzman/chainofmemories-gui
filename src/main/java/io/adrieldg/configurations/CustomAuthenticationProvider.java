@@ -26,6 +26,8 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     String username = authentication.getName();
     String password = authentication.getCredentials().toString();
 
+    restTemplate.getOAuth2ClientContext().setAccessToken(null);
+
     restTemplate.getOAuth2ClientContext().getAccessTokenRequest().set("username", username);
     restTemplate.getOAuth2ClientContext().getAccessTokenRequest().set("password", password);
 
