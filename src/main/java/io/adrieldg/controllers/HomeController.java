@@ -5,6 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import io.adrieldg.models.LoginCredentials;
 
@@ -18,10 +19,11 @@ public class HomeController {
   }
 
   @RequestMapping(path = "login", method = RequestMethod.GET)
-  String login(Model model, @RequestParam(value = "error", required = false) String error) {
+  String login(Model model, RedirectAttributes redirectAttributes, @RequestParam(value = "error", required = false) String error) {
     model.addAttribute(new LoginCredentials());
     if (error != null) {
-      model.addAttribute("error", error);
+      redirectAttributes.addFlashAttribute("error", error);
+      return "redirect:/login";
     }
     return "login";
   }

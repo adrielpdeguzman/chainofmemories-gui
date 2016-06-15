@@ -25,6 +25,7 @@ work/
 !.settings/org.eclipse.wst.html.core.prefs
 # > other misc eclipse artifacts
 .springBeans
+.factorypath
 bin
 atlassian-ide-plugin.xml
 
