@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.adrieldg.models.LoginCredentials;
 
@@ -17,8 +18,11 @@ public class HomeController {
   }
 
   @RequestMapping(path = "login", method = RequestMethod.GET)
-  String login(Model model) {
+  String login(Model model, @RequestParam(value = "error", required = false) String error) {
     model.addAttribute(new LoginCredentials());
+    if (error != null) {
+      model.addAttribute("error", error);
+    }
     return "login";
   }
 

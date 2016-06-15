@@ -1,21 +1,21 @@
 @font-family-base: "Myriad Set Pro", "Helvetica Neue", Helvetica, Monaco, Arial;
+@footer-height: 60px; 
+@link-color: #08c;
+@text-color: #333;
 
 html {
-  height:100%;
-  margin:0;
-  padding:0;
+  min-height:100%;
+  position: relative;
 }
 
 a {
-  color: #08c;
+  color: @link-color;
 }
 
 body {
-  color: #333;
+  color: @text-color;
   font-family: @font-family-base;
-  height:100%;
-  margin:0;
-  padding:0;
+  margin: 0 0 @footer-height;
 }
 
 nav {
@@ -31,7 +31,7 @@ div#main {
 footer {
   border-top: 1px solid #dadada;
   bottom: 0;
-  height: 60px;
+  height: @footer-height;
   left: 0;
   padding-top: 10px;
   position: absolute;
