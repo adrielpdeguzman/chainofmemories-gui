@@ -7,6 +7,9 @@
 </head>
 <body>
   <div layout:fragment="content">
+    <div class="alert alert-info alert-dismissible" role="alert" th:if="${logout}">
+         <span th:text="#{info.logout-success}"></span><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+      </div>
     <div class="jumbotron">
       <h1>Chain of Memories</h1>
       <p>Where memories are cherished and kept forever ~</p>
@@ -19,7 +22,7 @@
           section! Here, we'll find those forgotten conversations and events, as
           detailed as possible!</p>
         <p>
-          <a href="#" th:href="@{#}" class="btn btn-default">View Journals
+          <a href="#" th:href="@{/journals}" class="btn btn-default">View Journals
             &raquo;</a>
         </p>
       </div>

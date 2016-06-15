@@ -14,7 +14,12 @@ import io.adrieldg.models.LoginCredentials;
 public class HomeController {
 
   @RequestMapping(method = RequestMethod.GET)
-  String index(Model model) {
+  String index(Model model, RedirectAttributes redirectAttributes,
+      @RequestParam(value = "logout", required = false) String logout) {
+    if (logout != null) {
+      redirectAttributes.addFlashAttribute("logout", true);
+      return "redirect:/";
+    }
     return "index";
   }
 

@@ -18,32 +18,35 @@
           <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span>
           <span class="icon-bar"></span> <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="/" th:href="@{~/}">Chain of Memories</a>
+        <a class="navbar-brand" href="#" th:href="@{~/}">Chain of Memories</a>
       </div>
 
       <!-- Collect the nav links, forms, and other content for toggling -->
       <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-        <ul class="nav navbar-nav">
+        <ul sec:authorize="isAuthenticated()" class="nav navbar-nav">
           <li class="dropdown"><a href="#" class="dropdown-toggle"
             data-toggle="dropdown" role="button" aria-haspopup="true"
             aria-expanded="false">Journals <span class="caret"></span></a>
             <ul class="dropdown-menu">
               <li><a href="#">Write Entry</a></li>
               <li role="separator" class="divider"></li>
-              <li><a href="#">View Volumes</a></li>
+              <li><a href="#" th:href="@{/journals}">View Volumes</a></li>
               <li><a href="#">Random Entry</a></li>
               <li role="separator" class="divider"></li>
               <li><a href="#">Search</a></li>
             </ul></li>
-          <li sec:authorize="isAnonymous()"><a href="/login" th:href="@{/login}">Login <span
-              class="sr-only">(current)</span></a></li>
-          <li sec:authorize="isAuthenticated()">
+          <li>
             <form method="POST" th:action="@{/logout}" 
               accept-charset="UTF-8" role="form">
               <button type="submit" class="btn btn-link navbar-btn">Logout <span
               class="sr-only">(current)</span></button>
             </form>
           </li>
+        </ul>
+        
+        <ul sec:authorize="isAnonymous()" class="nav navbar-nav">
+          <li><a href="#" th:href="@{/login}">Login <span
+              class="sr-only">(current)</span></a></li>
         </ul>
       </div>
 

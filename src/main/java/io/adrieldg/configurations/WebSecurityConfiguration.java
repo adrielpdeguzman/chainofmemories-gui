@@ -28,7 +28,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   protected void configure(HttpSecurity http) throws Exception {
     /*@formatter:off*/
     http.authorizeRequests()
-        .antMatchers("/changelogs")
+        .antMatchers("/", "/changelogs")
         .permitAll()
         .anyRequest().fullyAuthenticated()
         .and()
@@ -39,7 +39,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         .and()
       .logout()
         .logoutUrl("/logout")
-        .logoutSuccessUrl("/")
+        .logoutSuccessUrl("/?logout")
         .permitAll();
     /*@formatter:on*/
   }
