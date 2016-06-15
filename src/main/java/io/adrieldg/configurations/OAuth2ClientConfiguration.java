@@ -15,6 +15,8 @@ import org.springframework.security.oauth2.client.token.AccessTokenProvider;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
+import org.springframework.web.util.DefaultUriTemplateHandler;
+import org.springframework.web.util.UriTemplateHandler;
 
 @Configuration
 public class OAuth2ClientConfiguration {
@@ -51,11 +53,20 @@ public class OAuth2ClientConfiguration {
   }
 
   @Bean
+  public UriTemplateHandler uriTemplateHandler() {
+    DefaultUriTemplateHandler uriTemplateHandler = new DefaultUriTemplateHandler();
+    uriTemplateHandler.setBaseUrl(apiUrl);
+
+    return uriTemplateHandler;
+  }
+
+  @Bean
   @Qualifier("myRestTemplate")
   public OAuth2RestOperations myRestTemplate() {
     OAuth2RestTemplate template = new OAuth2RestTemplate(resource(),
         new DefaultOAuth2ClientContext(new DefaultAccessTokenRequest()));
     template.setAccessTokenProvider(accessTokenProvider());
+    template.setUriTemplateHandler(uriTemplateHandler());
     return template;
   }
 }

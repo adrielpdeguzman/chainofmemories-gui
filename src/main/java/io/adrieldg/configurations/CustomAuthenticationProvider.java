@@ -32,10 +32,10 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     restTemplate.getOAuth2ClientContext().getAccessTokenRequest().set("password", password);
 
     try {
-      restTemplate.getForEntity("http://localhost:8081/me", String.class);
+      restTemplate.getForEntity("me", String.class);
     }
     catch (OAuth2AccessDeniedException e) {
-      throw new BadCredentialsException("Invalid credentials");
+      throw new BadCredentialsException(e.getSummary());
     }
     return new UsernamePasswordAuthenticationToken(username, password, new ArrayList<>());
   }

@@ -1,3 +1,7 @@
+logging:
+  level:
+    io.adrieldg: DEBUG
+
 global:
   apiUrl: http://localhost:8081/
 
