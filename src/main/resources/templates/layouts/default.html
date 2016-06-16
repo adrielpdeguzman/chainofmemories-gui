@@ -1,25 +1,18 @@
-<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
-  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <title layout:title-pattern="$DECORATOR_TITLE :: $CONTENT_TITLE">Chain
-    of Memories</title>
-  <link href="#"
-    th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"
-    media="screen" />
-  <link href="#" th:href="@{/css/master.less}" rel="stylesheet/less"
-    media="screen" />
-  <script src="#"
-    th:src="@{/webjars/jquery/jquery.min.js}"></script>
-  <script src="#" th:src="@{/webjars/less/less.min.js}"></script>
-  <script src="#"
-    th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
-  <script src="#"
-    th:src="@{/webjars/react/react.min.js}"></script>
-  <script src="#"
-    th:src="@{/webjars/react/react-dom.min.js}"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title layout:title-pattern="$DECORATOR_TITLE :: $CONTENT_TITLE">Chain
+  of Memories</title>
+<link href="#" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}"
+  rel="stylesheet" media="screen" />
+<link href="#" th:href="@{/css/master.less}" rel="stylesheet/less"
+  media="screen" />
+<script src="#" th:src="@{/webjars/jquery/jquery.min.js}"></script>
+<script src="#" th:src="@{/webjars/less/less.min.js}"></script>
+<script src="#" th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+<script src="#" th:src="@{/webjars/react/react.min.js}"></script>
+<script src="#" th:src="@{/webjars/react/react-dom.min.js}"></script>
 </head>
 <body>
   <div th:replace="layouts/_partials :: nav"></div>
@@ -27,5 +20,7 @@
   <div id="main" class="container" layout:fragment="content"></div>
 
   <div th:replace="layouts/_partials :: footer"></div>
+
+  <script src="#" th:src="@{/js/master.js}"></script>
 </body>
 </html>
