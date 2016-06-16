@@ -45,4 +45,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     return authentication.equals(UsernamePasswordAuthenticationToken.class);
   }
 
+  protected OAuth2RestOperations getRestTemplate() {
+    return restTemplate;
+  }
 }
