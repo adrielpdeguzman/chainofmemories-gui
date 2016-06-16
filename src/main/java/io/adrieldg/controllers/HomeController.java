@@ -33,9 +33,9 @@ public class HomeController {
     return "login";
   }
 
-  @RequestMapping(path = "changelogs", method = RequestMethod.GET)
-  String changelogs() {
-    return "changelogs";
+  @RequestMapping(path = "changelog", method = RequestMethod.GET)
+  String changelog() {
+    return "changelog";
   }
 
 }
