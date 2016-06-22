@@ -28,7 +28,8 @@ public class JournalController {
   }
   
   @RequestMapping(path = "{id}", method = RequestMethod.GET)
-  String show(@PathVariable Long id) {
+  String show(@PathVariable Long id, Model model) {
+    model.addAttribute("id", id);
     return "journals/show";
   }
 

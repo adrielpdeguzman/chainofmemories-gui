@@ -1,37 +1,47 @@
-var JournalBox = React.createClass({
-  render: function() {
+var journal_url = API_URL + "journals/";
+
+class JournalEntry extends React.Component{
+  constructor(props) {
+    super(props);
+    this.state = {
+      journal: [],
+      user: []
+    }
+  }
+  componentDidMount() {
+    let id = document.getElementById('react').dataset.journalId;
+    $.ajax({
+      url: journal_url + id,
+      success: function(data) {
+        console.log(data);
+        this.setState({ journal: data, user: data.user });
+      }.bind(this),
+    })
+  }
+  render() {
     return (
       <div className="journal panel panel-default">
         <div className="panel-heading text-uppercase">
           <h1 className="panel-title">
-            Vol. {this.props.journal.volume} Day {this.props.journal.day} | {this.props.journal.publishDate}
+            Vol. {this.state.journal.volume} Day {this.state.journal.day} | {this.state.journal.publishDate}
           </h1>
           <hr/>
           <h2 className="panel-title">
-            Posted by: {this.props.journal.user.firstName} {this.props.journal.user.lastName}
+            Posted by: {this.state.user.firstName} {this.state.user.lastName}
           </h2>
         </div>
         <div className="panel-body">
-          {this.props.journal.contents}
+          {this.state.journal.contents}
         </div>
         <ul className="list-group">
-          <li className="list-group-item">{this.props.journal.specialEvents}</li>
+          <li className="list-group-item">{this.state.journal.specialEvents}</li>
         </ul>
       </div>
     );
   }
-});
-
-var Journal = {
-        publishDate: '2013-12-07',
-        volume: 1,
-        day: 1,
-        contents: 'Lorem ipsum dolor',
-        specialEvents: 'Lorem ipsum dolor',
-        user: {firstName: 'Adriel', lastName: 'de Guzman'}
-};
+}
 
 ReactDOM.render(
-  <JournalBox journal={Journal} />,
+  <JournalEntry />,
   document.getElementById('react')
 );

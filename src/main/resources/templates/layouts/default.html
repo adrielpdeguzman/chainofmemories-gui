@@ -15,13 +15,18 @@
 <script src="#" th:src="@{/webjars/react/react-dom.min.js}"></script>
 <script src="#" th:src="@{/webjars/babel/browser.min.js}"></script>
 </head>
-<body>
+<body th:inline="text">
   <div th:replace="layouts/_partials :: nav"></div>
 
   <div id="main" class="container" layout:fragment="content"></div>
 
   <div th:replace="layouts/_partials :: footer"></div>
-
+  <script th:inline="javascript">
+    /* Define global variables from Spring */
+    /*<![CDATA[*/
+      const API_URL = [[${@environment.getProperty("global.apiUrl")}]];
+    /*]]>*/
+  </script>
   <script src="#" th:src="@{/js/master.js}"></script>
 </body>
 </html>
