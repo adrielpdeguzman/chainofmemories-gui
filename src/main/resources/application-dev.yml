@@ -3,7 +3,7 @@ logging:
     io.adrieldg: DEBUG
 
 global:
-  apiUrl: http://localhost:8081/
+  apiUrl: http://localhost:18080/
 
 server:
   port: 8080
