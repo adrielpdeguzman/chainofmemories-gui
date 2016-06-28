@@ -80,14 +80,34 @@ class Navigation extends React.Component {
     let volumes = this.state.volumes.map(function(volume) {
       var isSelected = (initialVolume == volume.volume) ? 'selected' : '';
       return <option value={volume.volume} selected={isSelected}>Volume {volume.volume} {volume.publishDate}</option>
+    });
+
+    var previousDay = 0;
+    let links = this.props.journals.map(function(link){
+      if(link.day == previousDay) {
+        return;
       }
-    );
+      else {
+        previousDay = link.day;
+        return <li><a href={"#" + link.day + "-" + link.user.firstName}>Day {link.day} | {link.publishDate}</a></li>;
+      }
+    });
 
     return (
       <div>
-        <select name="volume" className="form-control" onChange={this.volumeChanged}>
-          {volumes}
-        </select>
+        <div className="panel panel-default">
+          <div className="panel-heading">
+            <select name="volume" className="form-control" onChange={this.volumeChanged}>
+              {volumes}
+            </select>
+          </div>
+          <div className="panel-body">
+            <ul className="list-unstyled">
+              {links}
+              <li><a href="#outline">Special Events Outline</a></li>
+            </ul>
+          </div>
+        </div>
       </div>
     )
   }
@@ -120,9 +140,10 @@ class Journal extends React.Component {
 	}
 
   render() {
+    let events = parseSpecialEventsToList(this.props.journal.specialEvents)
     return (
       <div>
-        <div className="journal panel panel-default">
+        <div id={this.props.journal.day + "-" + this.props.journal.user.firstName} className="journal panel panel-default">
           <div className="panel-heading text-uppercase">
             <h2 className="panel-title">
               Vol. {this.props.journal.volume} Day {this.props.journal.day} | {this.props.journal.publishDate}
@@ -135,9 +156,11 @@ class Journal extends React.Component {
           <div className="panel-body">
             {this.props.journal.contents}
           </div>
-          <ul className="list-group">
-            <li className="list-group-item">{this.props.journal.specialEvents}</li>
-          </ul>
+          <div className="panel-footer">
+            <ul>
+              {events}
+            </ul>
+          </div>
         </div>
       </div>
     )
@@ -158,7 +181,7 @@ class SpecialEventsList extends React.Component {
     return (
       <div>
         <div className="panel panel-default">
-          <div className="panel-heading text-uppercase">
+          <div id="outline" className="panel-heading text-uppercase">
             <h2 className="panel-title">Special Events Outline</h2>
           </div>
           <div className="panel-body">
@@ -177,9 +200,7 @@ class SpecialEventsItem extends React.Component {
   }
 
   render() {
-    let events = this.props.journal.specialEvents.split(/\r?\n/).map(
-      event => <li>{event}</li>
-    );
+    let events = parseSpecialEventsToList(this.props.journal.specialEvents);
 
     return (
       <div>
@@ -194,14 +215,11 @@ class SpecialEventsItem extends React.Component {
 }
 
 function parseSpecialEventsToList(specialEvents) {
-  var events = specialEvents.split(/\r?\n/);
-  var retVal;
+  var events = specialEvents.split(/\r?\n/).map(
+    event => <li>{event}</li>
+  );
 
-  for (event of events) {
-    retVal += <li> + event + </li>;
-  }
-
-  return retVal;
+  return events;
 }
 
 ReactDOM.render(
