@@ -1,5 +1,7 @@
 const JOURNAL_URL = API_URL + "journals/";
 const FINDBYVOLUME_URL = JOURNAL_URL + 'search/findByVolume?v={0}';
+const GETVOLUMES_URL = JOURNAL_URL + 'search/getVolumesWithStartDate';
+
 var initialVolume = document.getElementById('react').dataset.volume;
 
 class App extends React.Component {
@@ -10,23 +12,37 @@ class App extends React.Component {
 		  volume: initialVolume,
 		  journals: []
 		}
+
+		this.handleChange = this.handleChange.bind(this);
 	}
 
-	componentDidMount() {
-	  console.log(FINDBYVOLUME_URL.format(this.state.volume));
-    $.ajax({
+	handleChange(e) {
+	  this.setState({
+	    volume: e.target.value
+	  });
+	}
+
+	loadJournalsByVolume() {
+	  $.ajax({
       url: FINDBYVOLUME_URL.format(this.state.volume),
       success: function(data) {
-        console.log(data._embedded);
         this.setState({ journals: data._embedded.journals });
       }.bind(this)
     });
 	}
 
+	componentDidMount() {
+    this.loadJournalsByVolume();
+	}
+
+	componentDidUpdate() {
+      this.loadJournalsByVolume();
+  	}
+
   render() {
     return (
       <div>
-        <Navigation journals={this.state.journals} volume={this.state.volume} />
+        <Navigation journals={this.state.journals} volume={this.state.volume} onVolumeChange={this.handleChange}/>
         <JournalList journals={this.state.journals} />
         <SpecialEvents journals={this.state.journals} />
       </div>
@@ -39,12 +55,36 @@ class Navigation extends React.Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      volumes: []
+    };
+
+    this.volumeChanged = this.volumeChanged.bind(this);
+  }
+
+  componentDidMount() {
+    $.ajax({
+      url: GETVOLUMES_URL,
+      success: function(data) {
+        this.setState({ volumes: data });
+      }.bind(this)
+    });
+  }
+
+  volumeChanged(e) {
+    this.props.onVolumeChange(e);
   }
 
   render() {
+    let volumes = this.state.volumes.map(
+      volume => <option value={volume.volume}>Volume {volume.volume} {volume.publishDate}</option>
+    );
+
     return (
       <div>
-        Navigation
+        <select name="volume" className="form-control" onChange={this.volumeChanged}>
+          {volumes}
+        </select>
       </div>
     )
   }
@@ -61,7 +101,6 @@ class JournalList extends React.Component {
     var journals = this.props.journals.map(
       journal => <Journal key={journal._links.self.href} journal={journal} />
     );
-    console.log(journals);
     return (
       <div>
         {journals}
@@ -78,7 +117,6 @@ class Journal extends React.Component {
 	}
 
   render() {
-    console.log(this.props.journal);
     return (
       <div>
         <div className="journal panel panel-default">

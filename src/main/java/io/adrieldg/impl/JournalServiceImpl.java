@@ -13,12 +13,10 @@ import io.adrieldg.services.JournalService;
 public class JournalServiceImpl implements JournalService {
 
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
+  private final String BASE_URL = "journals/";
   @Autowired
   @Qualifier("myRestTemplate")
   private OAuth2RestOperations restTemplate;
-
-  private final String BASE_URL = "journals/";
 
   @Override
   public Integer getCurrentVolume() {
