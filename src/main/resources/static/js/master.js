@@ -2,6 +2,18 @@ $.ajaxSetup({
   headers: { 'Authorization': 'Bearer' + getAccessToken() }
 });
 
+if (!String.prototype.format) {
+  String.prototype.format = function() {
+    var args = arguments;
+    return this.replace(/{(\d+)}/g, function(match, number) {
+      return typeof args[number] != 'undefined'
+        ? args[number]
+        : match
+      ;
+    });
+  };
+}
+
 function getCookie(name) {
   var re = new RegExp(name + "=([^;]+)");
   var value = re.exec(document.cookie);
@@ -9,7 +21,9 @@ function getCookie(name) {
 }
 
 function getAccessToken() {
-  return getCookie("chainofmemories_access_token");
+  //TODO Remove on production
+  //return getCookie("chainofmemories_access_token");
+  return "ef051cc8-e730-4036-9bce-2b933bfa9ca1";
 }
 
 $(function() {

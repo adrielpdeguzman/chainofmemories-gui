@@ -9,6 +9,9 @@
   <div layout:fragment="content">
     <div id="react" th:attr="data-journal-id=${id}"></div>
     <script type="text/babel" src="#" th:src="@{/js/journals.js}"></script>
+    <script type="text/babel">
+      renderJournalEntry(document.getElementById('react').dataset.journalId);
+    </script>
   </div>
 </body>
 </html>
