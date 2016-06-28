@@ -20,6 +20,7 @@ class App extends React.Component {
 	  this.setState({
 	    volume: e.target.value
 	  });
+	  updateURL(e.target.value);
 	}
 
 	loadJournalsByVolume() {
@@ -44,7 +45,7 @@ class App extends React.Component {
       <div>
         <Navigation journals={this.state.journals} volume={this.state.volume} onVolumeChange={this.handleChange}/>
         <JournalList journals={this.state.journals} />
-        <SpecialEvents journals={this.state.journals} />
+        <SpecialEventsList journals={this.state.journals} />
       </div>
     )
   }
@@ -76,8 +77,10 @@ class Navigation extends React.Component {
   }
 
   render() {
-    let volumes = this.state.volumes.map(
-      volume => <option value={volume.volume}>Volume {volume.volume} {volume.publishDate}</option>
+    let volumes = this.state.volumes.map(function(volume) {
+      var isSelected = (initialVolume == volume.volume) ? 'selected' : '';
+      return <option value={volume.volume} selected={isSelected}>Volume {volume.volume} {volume.publishDate}</option>
+      }
     );
 
     return (
@@ -141,23 +144,65 @@ class Journal extends React.Component {
   }
 }
 
-class SpecialEvents extends React.Component {
+class SpecialEventsList extends React.Component {
 
   constructor(props) {
     super(props);
   }
 
   render() {
+    var events = this.props.journals.map(
+      journal => <SpecialEventsItem journal={journal} />
+    );
+
     return (
       <div>
-        This is SpecialEvents
+        <div className="panel panel-default">
+          <div className="panel-heading text-uppercase">
+            <h2 className="panel-title">Special Events Outline</h2>
+          </div>
+          <div className="panel-body">
+            {events}
+          </div>
+        </div>
       </div>
     )
   }
-
 }
 
-var JOURNALS = {"_embedded":{"journals":[{"user":{"email":"adrielpdeguzman@icloud.com","firstName":"Adriel","lastName":"de Guzman"},"publishDate":"2013-12-07","volume":1,"day":1,"contents":"Test 1","specialEvents":"Lorem ipsum dolor","created":"","modified":"","_links":{"self":{"href":"http://localhost:18080/journals/1"},"journal":{"href":"http://localhost:18080/journals/1"},"journals":{"href":"http://localhost:18080/journals/1/journals"}}},{"user":{"email":"monaliceperez@icloud.com","firstName":"Monalice","lastName":"Perez"},"publishDate":"2013-12-07","volume":1,"day":1,"contents":"Test 3","specialEvents":"Lorem ipsum dolor","created":"","modified":"","_links":{"self":{"href":"http://localhost:18080/journals/3"},"journal":{"href":"http://localhost:18080/journals/3"},"journals":{"href":"http://localhost:18080/journals/3/journals"}}},{"user":{"email":"test@test.test","firstName":"Test","lastName":"Test"},"publishDate":"2016-06-27","volume":1,"day":1,"contents":"Lorem ipsum","specialEvents":"Lorem ipsum","created":{"dayOfYear":179,"dayOfWeek":"MONDAY","month":"JUNE","dayOfMonth":27,"hour":12,"minute":49,"second":21,"nano":130000000,"year":2016,"monthValue":6,"chronology":{"calendarType":"iso8601","id":"ISO"}},"modified":"","_links":{"self":{"href":"http://localhost:18080/journals/7"},"journal":{"href":"http://localhost:18080/journals/7"},"journals":{"href":"http://localhost:18080/journals/7/journals"}}}]},"_links":{"self":{"href":"http://localhost:18080/journals/search/findByVolume?v=1"}}};
+class SpecialEventsItem extends React.Component {
+
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    let events = this.props.journal.specialEvents.split(/\r?\n/).map(
+      event => <li>{event}</li>
+    );
+
+    return (
+      <div>
+        <p><em>Day {this.props.journal.day} | {this.props.journal.publishDate} by:
+        {this.props.journal.user.firstName}</em></p>
+        <ul>
+          {events}
+        </ul>
+      </div>
+    )
+  }
+}
+
+function parseSpecialEventsToList(specialEvents) {
+  var events = specialEvents.split(/\r?\n/);
+  var retVal;
+
+  for (event of events) {
+    retVal += <li> + event + </li>;
+  }
+
+  return retVal;
+}
 
 ReactDOM.render(
   <App />,
