@@ -81,7 +81,6 @@ class Navigation extends React.Component {
       var isSelected = (initialVolume == volume.volume) ? 'selected' : '';
       return <option value={volume.volume} selected={isSelected}>Volume {volume.volume} {volume.publishDate}</option>
     });
-
     var previousDay = 0;
     let links = this.props.journals.map(function(link){
       if(link.day == previousDay) {
@@ -124,6 +123,7 @@ class JournalList extends React.Component {
     var journals = this.props.journals.map(
       journal => <Journal key={journal._links.self.href} journal={journal} />
     );
+
     return (
       <div>
         {journals}
@@ -142,6 +142,7 @@ class Journal extends React.Component {
   render() {
     let events = splitNewLineAndEncloseWithTagWithClass(this.props.journal.specialEvents, "li");
     let contents = splitNewLineAndEncloseWithTagWithClass(this.props.journal.contents, "p");
+
     return (
       <div>
         <div id={this.props.journal.day + "-" + this.props.journal.user.firstName} className="journal panel panel-default">
