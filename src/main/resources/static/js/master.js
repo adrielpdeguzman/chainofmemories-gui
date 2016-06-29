@@ -32,8 +32,8 @@ function getCookie(name) {
 
 function getAccessToken() {
   //TODO Remove on production
-  return getCookie("chainofmemories_access_token");
-  //return 'ef051cc8-e730-4036-9bce-2b933bfa9ca1';
+  //return getCookie("chainofmemories_access_token");
+  return 'e5b23cd8-b49b-4ea6-90ad-bbf7b1bc65ff';
 }
 
 $(function() {
