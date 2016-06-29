@@ -11,21 +11,25 @@ class App extends React.Component {
 		super(props);
 		this.state = {
 		  volume: initialVolume,
-		  journals: []
+		  journals: [],
+		  datesWithoutEntry: [],
+		  volumesWithStartDate: []
 		};
 
-    this.handleCreateJournal = this.handleCreateJournal.bind(this);
-		this.handleChange = this.handleChange.bind(this);
+    this.handleJournalCreate = this.handleJournalCreate.bind(this);
+		this.handleVolumeChange = this.handleVolumeChange.bind(this);
 	}
 
-	handleChange(e) {
+	handleVolumeChange(volume) {
 	  this.setState({
-	    volume: e.target.value
-	  });
-	  updateURL(e.target.value);
+	    volume: volume
+	  },function() {
+      this.loadJournalsByVolume();
+      updateURL(volume);
+    });
 	}
 
-	handleCreateJournal(journal) {
+	handleJournalCreate(journal) {
 	  console.log(JSON.stringify(journal));
 	  $.ajax({
       url: JOURNAL_URL,
@@ -34,10 +38,48 @@ class App extends React.Component {
       type: 'POST',
       data: JSON.stringify(journal),
       success: function(data) {
+        $('#create-dialog').modal('hide');
         this.loadJournalsByVolume();
+        this.loadDatesWithoutEntry();
+        this.loadVolumesWithStartDate();
       }.bind(this)
     });
 	}
+
+	handleCreateJournal(journal) {
+    console.log(JSON.stringify(journal));
+    $.ajax({
+      url: JOURNAL_URL,
+      dataType: 'json',
+      contentType: 'application/json',
+      type: 'POST',
+      data: JSON.stringify(journal),
+      success: function(data) {
+        $('#create-dialog').modal('hide');
+        this.loadJournalsByVolume();
+        this.loadDatesWithoutEntry();
+        this.loadVolumesWithStartDate();
+      }.bind(this)
+    });
+  }
+
+  loadVolumesWithStartDate() {
+    $.ajax({
+      url: GETVOLUMES_URL,
+      success: function(data) {
+        this.setState({ volumesWithStartDate: data });
+      }.bind(this)
+    });
+  }
+
+  loadDatesWithoutEntry()  {
+    $.ajax({
+      url: GETDATES_URL,
+      success: function(data) {
+        this.setState({ datesWithoutEntry: data });
+      }.bind(this)
+    });
+  }
 
 	loadJournalsByVolume() {
 	  $.ajax({
@@ -50,17 +92,15 @@ class App extends React.Component {
 
 	componentDidMount() {
     this.loadJournalsByVolume();
+    this.loadDatesWithoutEntry();
+    this.loadVolumesWithStartDate();
 	}
-
-	componentDidUpdate() {
-      this.loadJournalsByVolume();
-  	}
 
   render() {
     return (
       <div>
-        <CreateDialog onSubmit={this.handleCreateJournal} />
-        <Navigation journals={this.state.journals} volume={this.state.volume} onVolumeChange={this.handleChange}/>
+        <CreateDialog onSubmit={this.handleJournalCreate} datesWithoutEntry={this.state.datesWithoutEntry} />
+        <Navigation journals={this.state.journals} onVolumeChange={this.handleVolumeChange} volumesWithStartDate={this.state.volumesWithStartDate} />
         <JournalList journals={this.state.journals} />
         <SpecialEventsList journals={this.state.journals} />
       </div>
@@ -73,28 +113,16 @@ class Navigation extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {
-      volumes: []
-    };
 
     this.volumeChanged = this.volumeChanged.bind(this);
   }
 
-  componentDidMount() {
-    $.ajax({
-      url: GETVOLUMES_URL,
-      success: function(data) {
-        this.setState({ volumes: data });
-      }.bind(this)
-    });
-  }
-
   volumeChanged(e) {
-    this.props.onVolumeChange(e);
+    this.props.onVolumeChange(e.target.value);
   }
 
   render() {
-    let volumes = this.state.volumes.map(function(volume) {
+    let volumes = this.props.volumesWithStartDate.map(function(volume) {
       var isSelected = (initialVolume == volume.volume) ? 'selected' : '';
       return <option value={volume.volume} selected={isSelected}>Volume {volume.volume} {volume.publishDate}</option>
     });
@@ -223,8 +251,7 @@ class SpecialEventsItem extends React.Component {
 
     return (
       <div>
-        <p><em>Day {this.props.journal.day} | {this.props.journal.publishDate} by:
-        {this.props.journal.user.firstName}</em></p>
+        <p><em>Day {this.props.journal.day} | {this.props.journal.publishDate} by: {this.props.journal.user.firstName} {this.props.journal.user.lastName}</em></p>
         <ul>
           {events}
         </ul>
@@ -238,27 +265,21 @@ class CreateDialog extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      dates: [],
       publishDate: '',
       contents: '',
       specialEvents: ''
     };
 
+    this.handleModalShow = this.handleModalShow.bind(this);
     this.handleDateChange = this.handleDateChange.bind(this);
     this.handleContentsChange = this.handleContentsChange.bind(this);
     this.handleSpecialEventsChange = this.handleSpecialEventsChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  componentDidMount() {
-    $.ajax({
-      url: GETDATES_URL,
-      success: function(data) {
-        this.setState({ dates: data, publishDate: data[0] });
-      }.bind(this)
-    });
+  handleModalShow() {
+    this.setState({ publishDate: this.props.datesWithoutEntry[0] });
   }
-
   handleDateChange(e) {
     this.setState({ publishDate: e.target.value });
   }
@@ -289,34 +310,52 @@ class CreateDialog extends React.Component {
   }
 
   render() {
-    let dates = this.state.dates.map(
+    let dates = this.props.datesWithoutEntry.map(
       date => <option value={date}>{date}</option>
     );
     return (
       <div>
-        <form>
-          <select name="publishDate" className="form-control" onChange={this.handleDateChange}>
-            {dates}
-          </select>
-          <div class="form-group">
-            <label for="contents">
-              <p>Journal Contents</p>
-              <textarea class="form-control" id="contents" name="contents" rows="12" cols="50"
-                required="required" onChange={this.handleContentsChange}></textarea>
-            </label>
-          </div>
-          <div class="form-group">
-            <label for="specialEvents">
-              <p>Special Events</p>
-              <textarea class="form-control" id="specialEvents" name="specialEvents" rows="4"
-              cols="50" onChange={this.handleSpecialEventsChange}></textarea>
-            </label>
-          </div>
+        <button type="button" className="btn btn-primary btn-block" data-toggle="modal"
+        data-target="#create-dialog" onClick={this.handleModalShow}>Create New Journal Entry</button>
+        <div className="modal fade" id="create-dialog" tabindex="-1" role="dialog">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span></button>
+                <h4 className="modal-title">Create New Journal Entry</h4>
+              </div>
 
-          <button onClick={this.handleSubmit} className="form-control btn btn-primary btn-block">
-            Create Journal Entry
-          </button>
-        </form>
+              <div className="modal-body">
+                <form>
+                  <label htmlFor="publishDate">Publish Date</label>
+                  <select name="publishDate" className="form-control" onChange={this.handleDateChange}
+                   value={this.state.publishDate}>
+                    {dates}
+                  </select>
+                  <div class="form-group">
+                    <label htmlFor="contents">Journal Contents</label>
+                    <textarea className="form-control" id="contents" name="contents" rows="10"
+                     cols="100" required="required" onChange={this.handleContentsChange}
+                     value={this.state.contents}></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label htmlFor="specialEvents">Special Events</label>
+                    <textarea className="form-control" id="specialEvents" name="specialEvents" rows="4"
+                     cols="100" onChange={this.handleSpecialEventsChange}
+                     value={this.state.specialEvents}></textarea>
+                  </div>
+                </form>
+              </div>
+
+              <div className="modal-footer">
+                <input type="submit" onClick={this.handleSubmit} className="btn btn-primary"
+                disabled={!this.state.contents} value="Create Journal Entry"/>
+                <button type="button" className="btn btn-default" data-dismiss="modal">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
