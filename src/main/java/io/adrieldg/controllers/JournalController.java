@@ -22,25 +22,14 @@ public class JournalController {
 
   @RequestMapping(method = RequestMethod.GET)
   String index() {
-    logger.debug("Entered index mapping");
     int currentVolume = journalService.getCurrentVolume();
+    logger.debug("Entered journals/volume mapping at " + currentVolume);
     return "redirect:/journals/volume/" + currentVolume;
-  }
-  
-  @RequestMapping(path = "{id}", method = RequestMethod.GET)
-  String show(@PathVariable Long id, Model model) {
-    model.addAttribute("id", id);
-    return "journals/show";
   }
 
   @RequestMapping("volume/{volume}")
   String volume(@PathVariable Integer volume, Model model) {
     model.addAttribute("volume", volume);
-    return "journals/volume";
-  }
-
-  @RequestMapping("random")
-  String random() {
-    return "journals/random";
+    return "journals/index";
   }
 }

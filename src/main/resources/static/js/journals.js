@@ -1,6 +1,7 @@
 const JOURNAL_URL = API_URL + "journals/";
 const FINDBYVOLUME_URL = JOURNAL_URL + 'search/findByVolume?v={0}';
 const GETVOLUMES_URL = JOURNAL_URL + 'search/getVolumesWithStartDate';
+const GETDATES_URL = JOURNAL_URL + 'search/getDatesWithoutEntry';
 
 var initialVolume = document.getElementById('react').dataset.volume;
 
@@ -11,8 +12,9 @@ class App extends React.Component {
 		this.state = {
 		  volume: initialVolume,
 		  journals: []
-		}
+		};
 
+    this.handleCreateJournal = this.handleCreateJournal.bind(this);
 		this.handleChange = this.handleChange.bind(this);
 	}
 
@@ -21,6 +23,20 @@ class App extends React.Component {
 	    volume: e.target.value
 	  });
 	  updateURL(e.target.value);
+	}
+
+	handleCreateJournal(journal) {
+	  console.log(JSON.stringify(journal));
+	  $.ajax({
+      url: JOURNAL_URL,
+      dataType: 'json',
+      contentType: 'application/json',
+      type: 'POST',
+      data: JSON.stringify(journal),
+      success: function(data) {
+        this.loadJournalsByVolume();
+      }.bind(this)
+    });
 	}
 
 	loadJournalsByVolume() {
@@ -43,6 +59,7 @@ class App extends React.Component {
   render() {
     return (
       <div>
+        <CreateDialog onSubmit={this.handleCreateJournal} />
         <Navigation journals={this.state.journals} volume={this.state.volume} onVolumeChange={this.handleChange}/>
         <JournalList journals={this.state.journals} />
         <SpecialEventsList journals={this.state.journals} />
@@ -213,6 +230,95 @@ class SpecialEventsItem extends React.Component {
         </ul>
       </div>
     )
+  }
+}
+
+class CreateDialog extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      dates: [],
+      publishDate: '',
+      contents: '',
+      specialEvents: ''
+    };
+
+    this.handleDateChange = this.handleDateChange.bind(this);
+    this.handleContentsChange = this.handleContentsChange.bind(this);
+    this.handleSpecialEventsChange = this.handleSpecialEventsChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  componentDidMount() {
+    $.ajax({
+      url: GETDATES_URL,
+      success: function(data) {
+        this.setState({ dates: data, publishDate: data[0] });
+      }.bind(this)
+    });
+  }
+
+  handleDateChange(e) {
+    this.setState({ publishDate: e.target.value });
+  }
+
+  handleContentsChange(e) {
+    this.setState({ contents: e.target.value });
+  }
+
+  handleSpecialEventsChange(e) {
+    this.setState({ specialEvents: e.target.value });
+  }
+
+  handleSubmit(e) {
+    e.preventDefault();
+    var journal = {};
+    var contents = this.state.contents.trim();
+    var specialEvents = this.state.specialEvents.trim();
+    if(!contents) {
+      return;
+    }
+
+    journal.publishDate = this.state.publishDate;
+    journal.contents = contents;
+    journal.specialEvents = specialEvents;
+
+    this.props.onSubmit(journal);
+    this.setState({ publishDate: '', contents: '', specialEvents: '' });
+  }
+
+  render() {
+    let dates = this.state.dates.map(
+      date => <option value={date}>{date}</option>
+    );
+    return (
+      <div>
+        <form>
+          <select name="publishDate" className="form-control" onChange={this.handleDateChange}>
+            {dates}
+          </select>
+          <div class="form-group">
+            <label for="contents">
+              <p>Journal Contents</p>
+              <textarea class="form-control" id="contents" name="contents" rows="12" cols="50"
+                required="required" onChange={this.handleContentsChange}></textarea>
+            </label>
+          </div>
+          <div class="form-group">
+            <label for="specialEvents">
+              <p>Special Events</p>
+              <textarea class="form-control" id="specialEvents" name="specialEvents" rows="4"
+              cols="50" onChange={this.handleSpecialEventsChange}></textarea>
+            </label>
+          </div>
+
+          <button onClick={this.handleSubmit} className="form-control btn btn-primary btn-block">
+            Create Journal Entry
+          </button>
+        </form>
+      </div>
+    );
   }
 }
 

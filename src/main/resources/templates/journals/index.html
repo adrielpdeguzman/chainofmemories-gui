@@ -3,11 +3,12 @@
   xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
   layout:decorator="layouts/default">
 <head>
-<title>Journals</title>
+<title th:text="${'Volume ' + volume}"></title>
 </head>
 <body>
   <div layout:fragment="content">
-  	Hello world!
+    <div id="react" th:attr="data-volume=${volume}"></div>
+    <script type="text/babel" src="#" th:src="@{/js/journals.js}"></script>
   </div>
 </body>
 </html>
