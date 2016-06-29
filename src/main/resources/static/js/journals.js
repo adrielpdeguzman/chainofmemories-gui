@@ -140,7 +140,8 @@ class Journal extends React.Component {
 	}
 
   render() {
-    let events = parseSpecialEventsToList(this.props.journal.specialEvents)
+    let events = splitNewLineAndEncloseWithTagWithClass(this.props.journal.specialEvents, "li");
+    let contents = splitNewLineAndEncloseWithTagWithClass(this.props.journal.contents, "p");
     return (
       <div>
         <div id={this.props.journal.day + "-" + this.props.journal.user.firstName} className="journal panel panel-default">
@@ -154,7 +155,7 @@ class Journal extends React.Component {
             </h3>
           </div>
           <div className="panel-body">
-            {this.props.journal.contents}
+            {contents}
           </div>
           <div className="panel-footer">
             <ul>
@@ -200,7 +201,7 @@ class SpecialEventsItem extends React.Component {
   }
 
   render() {
-    let events = parseSpecialEventsToList(this.props.journal.specialEvents);
+    let events = splitNewLineAndEncloseWithTagWithClass(this.props.journal.specialEvents, "li", "");
 
     return (
       <div>
@@ -214,12 +215,36 @@ class SpecialEventsItem extends React.Component {
   }
 }
 
-function parseSpecialEventsToList(specialEvents) {
-  var events = specialEvents.split(/\r?\n/).map(
-    event => <li>{event}</li>
-  );
+function splitNewLineAndEncloseWithTagWithClass(input, tag, cssClass = null) {
+  var input = input.split(/\r?\n/);
 
-  return events;
+  switch(tag) {
+    case "li":
+      var lines = input.map(
+        line => <li className={cssClass}>{line}</li>
+      );
+      break;
+    case "div":
+      var lines = input.map(
+        line => <div className={cssClass}>{line}</div>
+      );
+      break;
+    case "p":
+      var lines = input.map(
+        line => <p className={cssClass}>{line}</p>
+      );
+      break;
+    case "span":
+      var lines = input.map(
+        line => <span className={cssClass}>{line}</span>
+      );
+      break;
+    default:
+      var lines = input.map(
+        line => {line}
+      );
+  }
+  return lines;
 }
 
 ReactDOM.render(
