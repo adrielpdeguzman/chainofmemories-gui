@@ -14,7 +14,8 @@ class App extends React.Component {
 		  journals: [],
 		  datesWithoutEntry: [],
 		  volumesWithStartDate: [],
-		  journal: []
+		  journal: [],
+		  principal: ''
 		};
 
     this.handleUpdateDialogShow = this.handleUpdateDialogShow.bind(this);
@@ -23,14 +24,16 @@ class App extends React.Component {
 		this.handleVolumeChange = this.handleVolumeChange.bind(this);
 	}
 
-  handleUpdateDialogShow(journalToUpdate) {
-    this.setState({ journal: journalToUpdate });
+  handleUpdateDialogShow(journal) {
+    this.setState({ journal: journal });
   }
+
 	handleVolumeChange(volume) {
 	  this.setState({
 	    volume: volume
 	  },function() {
       this.loadJournalsByVolume();
+      this.loadPrincipal();
       updateURL(volume);
     });
 	}
@@ -53,7 +56,7 @@ class App extends React.Component {
 
 	handleJournalUpdate(journal) {
     $.ajax({
-      url: this.state.journal.href,
+      url: this.state.journal._links.self.href,
       dataType: 'json',
       contentType: 'application/json',
       type: 'PATCH',
@@ -94,8 +97,18 @@ class App extends React.Component {
     });
 	}
 
+	loadPrincipal() {
+	  $.ajax({
+      url: API_URL + 'me',
+      success: function(data) {
+        this.setState({ principal: data.name });
+      }.bind(this)
+    });
+	}
+
 	componentDidMount() {
     this.loadJournalsByVolume();
+    this.loadPrincipal();
     this.loadDatesWithoutEntry();
     this.loadVolumesWithStartDate();
 	}
@@ -106,7 +119,7 @@ class App extends React.Component {
         <CreateDialog onSubmit={this.handleJournalCreate} datesWithoutEntry={this.state.datesWithoutEntry} />
         <UpdateDialog onSubmit={this.handleJournalUpdate} journal={this.state.journal} />
         <Navigation journals={this.state.journals} onVolumeChange={this.handleVolumeChange} volumesWithStartDate={this.state.volumesWithStartDate} />
-        <JournalList journals={this.state.journals} onClickUpdate={this.handleUpdateDialogShow}/>
+        <JournalList journals={this.state.journals} onClickUpdate={this.handleUpdateDialogShow} principal={this.state.principal}/>
         <SpecialEventsList journals={this.state.journals} />
       </div>
     )
@@ -171,7 +184,7 @@ class JournalList extends React.Component {
 
   render() {
     var journals = this.props.journals.map(
-      journal => <Journal key={journal._links.self.href} journal={journal} onClickUpdate={this.props.onClickUpdate} />
+      journal => <Journal key={journal._links.self.href} journal={journal} onClickUpdate={this.props.onClickUpdate} principal={this.props.principal}/>
     );
 
     return (
@@ -203,8 +216,11 @@ class Journal extends React.Component {
         <div id={this.props.journal.day + "-" + this.props.journal.user.firstName} className="journal panel panel-default">
           <div className="panel-heading text-uppercase">
             <h2 className="panel-title">
+              {this.props.principal == this.props.journal.user.username ?
               <button onClick={this.handleModalShow} className="btn btn-default pull-right"
               data-toggle="modal" data-target="#update-dialog"><span className="glyphicon glyphicon-edit"></span></button>
+              : null
+              }
               Vol. {this.props.journal.volume} Day {this.props.journal.day} | {this.props.journal.publishDate}
             </h2>
             <hr/>
@@ -398,7 +414,7 @@ class UpdateDialog extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    var journal = this.props.journal;
+    var journal = {};
     var contents = this.state.contents.trim();
     var specialEvents = this.state.specialEvents.trim();
     if(!contents) {
