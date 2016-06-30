@@ -13,13 +13,19 @@ class App extends React.Component {
 		  volume: initialVolume,
 		  journals: [],
 		  datesWithoutEntry: [],
-		  volumesWithStartDate: []
+		  volumesWithStartDate: [],
+		  journal: []
 		};
 
+    this.handleUpdateDialogShow = this.handleUpdateDialogShow.bind(this);
     this.handleJournalCreate = this.handleJournalCreate.bind(this);
+    this.handleJournalUpdate = this.handleJournalUpdate.bind(this);
 		this.handleVolumeChange = this.handleVolumeChange.bind(this);
 	}
 
+  handleUpdateDialogShow(journalToUpdate) {
+    this.setState({ journal: journalToUpdate });
+  }
 	handleVolumeChange(volume) {
 	  this.setState({
 	    volume: volume
@@ -30,7 +36,6 @@ class App extends React.Component {
 	}
 
 	handleJournalCreate(journal) {
-	  console.log(JSON.stringify(journal));
 	  $.ajax({
       url: JOURNAL_URL,
       dataType: 'json',
@@ -46,16 +51,15 @@ class App extends React.Component {
     });
 	}
 
-	handleCreateJournal(journal) {
-    console.log(JSON.stringify(journal));
+	handleJournalUpdate(journal) {
     $.ajax({
-      url: JOURNAL_URL,
+      url: this.state.journal.href,
       dataType: 'json',
       contentType: 'application/json',
-      type: 'POST',
+      type: 'PATCH',
       data: JSON.stringify(journal),
       success: function(data) {
-        $('#create-dialog').modal('hide');
+        $('#update-dialog').modal('hide');
         this.loadJournalsByVolume();
         this.loadDatesWithoutEntry();
         this.loadVolumesWithStartDate();
@@ -100,8 +104,9 @@ class App extends React.Component {
     return (
       <div>
         <CreateDialog onSubmit={this.handleJournalCreate} datesWithoutEntry={this.state.datesWithoutEntry} />
+        <UpdateDialog onSubmit={this.handleJournalUpdate} journal={this.state.journal} />
         <Navigation journals={this.state.journals} onVolumeChange={this.handleVolumeChange} volumesWithStartDate={this.state.volumesWithStartDate} />
-        <JournalList journals={this.state.journals} />
+        <JournalList journals={this.state.journals} onClickUpdate={this.handleUpdateDialogShow}/>
         <SpecialEventsList journals={this.state.journals} />
       </div>
     )
@@ -166,7 +171,7 @@ class JournalList extends React.Component {
 
   render() {
     var journals = this.props.journals.map(
-      journal => <Journal key={journal._links.self.href} journal={journal} />
+      journal => <Journal key={journal._links.self.href} journal={journal} onClickUpdate={this.props.onClickUpdate} />
     );
 
     return (
@@ -182,17 +187,24 @@ class Journal extends React.Component {
 
   constructor(props) {
 		super(props);
+
+		this.handleModalShow = this.handleModalShow.bind(this);
+	}
+
+	handleModalShow() {
+    this.props.onClickUpdate(this.props.journal);
 	}
 
   render() {
     let events = splitNewLineAndEncloseWithTagWithClass(this.props.journal.specialEvents, "li");
     let contents = splitNewLineAndEncloseWithTagWithClass(this.props.journal.contents, "p");
-
     return (
       <div>
         <div id={this.props.journal.day + "-" + this.props.journal.user.firstName} className="journal panel panel-default">
           <div className="panel-heading text-uppercase">
             <h2 className="panel-title">
+              <button onClick={this.handleModalShow} className="btn btn-default pull-right"
+              data-toggle="modal" data-target="#update-dialog"><span className="glyphicon glyphicon-edit"></span></button>
               Vol. {this.props.journal.volume} Day {this.props.journal.day} | {this.props.journal.publishDate}
             </h2>
             <hr/>
@@ -352,6 +364,93 @@ class CreateDialog extends React.Component {
               <div className="modal-footer">
                 <input type="submit" onClick={this.handleSubmit} className="btn btn-primary"
                 disabled={!this.state.contents} value="Create Journal Entry"/>
+                <button type="button" className="btn btn-default" data-dismiss="modal">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+class UpdateDialog extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      contents: '',
+      specialEvents: ''
+    };
+
+    this.handleContentsChange = this.handleContentsChange.bind(this);
+    this.handleSpecialEventsChange = this.handleSpecialEventsChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleContentsChange(e) {
+    this.setState({ contents: e.target.value });
+  }
+
+  handleSpecialEventsChange(e) {
+    this.setState({ specialEvents: e.target.value });
+  }
+
+  handleSubmit(e) {
+    e.preventDefault();
+    var journal = this.props.journal;
+    var contents = this.state.contents.trim();
+    var specialEvents = this.state.specialEvents.trim();
+    if(!contents) {
+      return;
+    }
+
+    journal.contents = contents;
+    journal.specialEvents = specialEvents;
+
+    this.props.onSubmit(journal);
+    this.setState({ contents: '', specialEvents: '' });
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      contents: nextProps.journal.contents,
+      specialEvents: nextProps.journal.specialEvents
+    });
+  }
+
+  render() {
+    return (
+      <div>
+        <div className="modal fade" id="update-dialog" tabindex="-1" role="dialog">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span></button>
+                <h4 className="modal-title">Update Journal Entry</h4>
+              </div>
+
+              <div className="modal-body">
+                <form>
+                  <div class="form-group">
+                    <label htmlFor="contents">Journal Contents</label>
+                    <textarea className="form-control" id="contents" name="contents" rows="10"
+                     cols="100" required="required" onChange={this.handleContentsChange}
+                     value={this.state.contents}></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label htmlFor="specialEvents">Special Events</label>
+                    <textarea className="form-control" id="specialEvents" name="specialEvents" rows="4"
+                     cols="100" onChange={this.handleSpecialEventsChange}
+                     value={this.state.specialEvents}></textarea>
+                  </div>
+                </form>
+              </div>
+
+              <div className="modal-footer">
+                <input type="submit" onClick={this.handleSubmit} className="btn btn-primary"
+                disabled={!this.state.contents} value="Update Journal Entry"/>
                 <button type="button" className="btn btn-default" data-dismiss="modal">Cancel</button>
               </div>
             </div>
