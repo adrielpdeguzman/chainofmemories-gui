@@ -316,7 +316,8 @@ class CreateDialog extends React.Component {
     return (
       <div>
         <button type="button" className="btn btn-primary btn-block" data-toggle="modal"
-        data-target="#create-dialog" onClick={this.handleModalShow}>Create New Journal Entry</button>
+        data-target="#create-dialog" onClick={this.handleModalShow} disabled={this.props.datesWithoutEntry.length == 0}>
+        {this.props.datesWithoutEntry == 0 ? "Complete Journal Entries!" : "Create Journal Entry"}</button>
         <div className="modal fade" id="create-dialog" tabindex="-1" role="dialog">
           <div className="modal-dialog">
             <div className="modal-content">
