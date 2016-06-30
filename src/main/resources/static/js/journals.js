@@ -15,7 +15,8 @@ class App extends React.Component {
 		  datesWithoutEntry: [],
 		  volumesWithStartDate: [],
 		  journal: [],
-		  principal: ''
+		  principal: '',
+		  isSearchActive: false
 		};
 
     this.handleUpdateDialogShow = this.handleUpdateDialogShow.bind(this);
@@ -116,11 +117,20 @@ class App extends React.Component {
   render() {
     return (
       <div>
-        <CreateDialog onSubmit={this.handleJournalCreate} datesWithoutEntry={this.state.datesWithoutEntry} />
-        <UpdateDialog onSubmit={this.handleJournalUpdate} journal={this.state.journal} />
-        <Navigation journals={this.state.journals} onVolumeChange={this.handleVolumeChange} volumesWithStartDate={this.state.volumesWithStartDate} />
+        <div>
+          <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#create-dialog"
+            disabled={this.state.datesWithoutEntry.length == 0}>
+            <span className="glyphicon glyphicon-pencil"></span> Write</button>
+          <button className="btn btn-default" onClick={this.handleSearchActivate}>
+            <span className="glyphicon glyphicon-search"></span> Search</button>
+          <button className="btn btn-default" onClick={this.handleRandomActivate}>
+            <span className="glyphicon glyphicon-asterisk"></span> Random</button>
+        </div>
+        <Navigation journals={this.state.journals} onVolumeChange={this.handleVolumeChange} volumesWithStartDate={this.state.volumesWithStartDate}/>
         <JournalList journals={this.state.journals} onClickUpdate={this.handleUpdateDialogShow} principal={this.state.principal}/>
         <SpecialEventsList journals={this.state.journals} />
+        <CreateDialog onSubmit={this.handleJournalCreate} datesWithoutEntry={this.state.datesWithoutEntry} />
+        <UpdateDialog onSubmit={this.handleJournalUpdate} journal={this.state.journal} />
       </div>
     )
   }
@@ -214,19 +224,18 @@ class Journal extends React.Component {
     return (
       <div>
         <div id={this.props.journal.day + "-" + this.props.journal.user.firstName} className="journal panel panel-default">
-          <div className="panel-heading text-uppercase">
-            <h2 className="panel-title">
+          <div className="panel-heading">
+            <h2 className="panel-title text-uppercase">
               {this.props.principal == this.props.journal.user.username ?
               <button onClick={this.handleModalShow} className="btn btn-default pull-right"
               data-toggle="modal" data-target="#update-dialog"><span className="glyphicon glyphicon-edit"></span></button>
               : null
               }
-              Vol. {this.props.journal.volume} Day {this.props.journal.day} | {this.props.journal.publishDate}
+              Day {this.props.journal.day} | {this.props.journal.publishDate}
             </h2>
-            <hr/>
-            <h3 className="panel-title">
+            <h4 className="panel-title">
               Posted by: {this.props.journal.user.firstName} {this.props.journal.user.lastName}
-            </h3>
+            </h4>
           </div>
           <div className="panel-body">
             {contents}
@@ -298,16 +307,12 @@ class CreateDialog extends React.Component {
       specialEvents: ''
     };
 
-    this.handleModalShow = this.handleModalShow.bind(this);
     this.handleDateChange = this.handleDateChange.bind(this);
     this.handleContentsChange = this.handleContentsChange.bind(this);
     this.handleSpecialEventsChange = this.handleSpecialEventsChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleModalShow() {
-    this.setState({ publishDate: this.props.datesWithoutEntry[0] });
-  }
   handleDateChange(e) {
     this.setState({ publishDate: e.target.value });
   }
@@ -329,7 +334,7 @@ class CreateDialog extends React.Component {
       return;
     }
 
-    journal.publishDate = this.state.publishDate;
+    journal.publishDate = this.state.publishDate || this.props.datesWithoutEntry[0];
     journal.contents = contents;
     journal.specialEvents = specialEvents;
 
@@ -343,9 +348,6 @@ class CreateDialog extends React.Component {
     );
     return (
       <div>
-        <button type="button" className="btn btn-primary btn-block" data-toggle="modal"
-        data-target="#create-dialog" onClick={this.handleModalShow} disabled={this.props.datesWithoutEntry.length == 0}>
-        {this.props.datesWithoutEntry == 0 ? "Complete Journal Entries!" : "Create Journal Entry"}</button>
         <div className="modal fade" id="create-dialog" tabindex="-1" role="dialog">
           <div className="modal-dialog">
             <div className="modal-content">
@@ -444,7 +446,7 @@ class UpdateDialog extends React.Component {
               <div className="modal-header">
                 <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span></button>
-                <h4 className="modal-title">Update Journal Entry</h4>
+                <h4 className="modal-title">Day {this.props.journal.day} | {this.props.journal.publishDate}</h4>
               </div>
 
               <div className="modal-body">
