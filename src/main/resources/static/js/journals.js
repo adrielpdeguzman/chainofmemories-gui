@@ -2,6 +2,9 @@ const JOURNAL_URL = API_URL + "journals/";
 const FINDBYVOLUME_URL = JOURNAL_URL + 'search/findByVolume?v={0}';
 const GETVOLUMES_URL = JOURNAL_URL + 'search/getVolumesWithStartDate';
 const GETDATES_URL = JOURNAL_URL + 'search/getDatesWithoutEntry';
+const SEARCHVC_URL = JOURNAL_URL + 'search/findByContentsAndVolume?q={0}&v={1}';
+const SEARCHC_URL = JOURNAL_URL + 'search/findByContents?q={0}';
+const RANDOM_URL = JOURNAL_URL + 'search/findRandom';
 
 var initialVolume = document.getElementById('react').dataset.volume;
 
@@ -23,6 +26,9 @@ class App extends React.Component {
     this.handleJournalCreate = this.handleJournalCreate.bind(this);
     this.handleJournalUpdate = this.handleJournalUpdate.bind(this);
 		this.handleVolumeChange = this.handleVolumeChange.bind(this);
+		this.handleSearchQuery = this.handleSearchQuery.bind(this);
+		this.handleSearchStatus = this.handleSearchStatus.bind(this);
+		this.handleRandomActivate = this.handleRandomActivate.bind(this);
 	}
 
   handleUpdateDialogShow(journal) {
@@ -80,6 +86,36 @@ class App extends React.Component {
     });
   }
 
+  handleSearchQuery(searchQuery) {
+    var url;
+    if (searchQuery.v == 0) {
+      url = SEARCHC_URL.format(searchQuery.q);
+    }
+    else {
+      url = SEARCHVC_URL.format(searchQuery.q, searchQuery.v);
+    }
+    $.ajax({
+      url: url,
+      success: function(data) {
+        this.setState({ journals: data._embedded.journals, isSearchActive: true });
+      }.bind(this)
+    });
+  }
+
+  handleRandomActivate() {
+      $.ajax({
+        url: RANDOM_URL,
+        success: function(data) {
+          this.setState({ journal: data });
+        }.bind(this)
+      });
+    }
+
+  handleSearchStatus() {
+    this.setState({ isSearchActive: !this.state.isSearchActive });
+    this.loadJournalsByVolume();
+  }
+
   loadDatesWithoutEntry()  {
     $.ajax({
       url: GETDATES_URL,
@@ -117,20 +153,22 @@ class App extends React.Component {
   render() {
     return (
       <div>
-        <div>
+        <div className={this.state.isSearchActive ? 'hidden' : ''}>
           <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#create-dialog"
             disabled={this.state.datesWithoutEntry.length == 0}>
             <span className="glyphicon glyphicon-pencil"></span> Write</button>
-          <button className="btn btn-default" onClick={this.handleSearchActivate}>
-            <span className="glyphicon glyphicon-search"></span> Search</button>
-          <button className="btn btn-default" onClick={this.handleRandomActivate}>
+          <button className="btn btn-default" onClick={this.handleRandomActivate} data-toggle="modal" data-target="#random-dialog">
             <span className="glyphicon glyphicon-asterisk"></span> Random</button>
         </div>
-        <Navigation journals={this.state.journals} onVolumeChange={this.handleVolumeChange} volumesWithStartDate={this.state.volumesWithStartDate}/>
+        <Search volumesWithStartDate={this.state.volumesWithStartDate} onSubmit={this.handleSearchQuery}
+         isSearchActive={this.state.isSearchActive} handleSearchStatus={this.handleSearchStatus}/>
+        {!this.state.isSearchActive ? <Navigation journals={this.state.journals} onVolumeChange={this.handleVolumeChange}
+         volumesWithStartDate={this.state.volumesWithStartDate} />: null}
         <JournalList journals={this.state.journals} onClickUpdate={this.handleUpdateDialogShow} principal={this.state.principal}/>
-        <SpecialEventsList journals={this.state.journals} />
+        {!this.state.isSearchActive ? <SpecialEventsList journals={this.state.journals} /> : null}
         <CreateDialog onSubmit={this.handleJournalCreate} datesWithoutEntry={this.state.datesWithoutEntry} />
         <UpdateDialog onSubmit={this.handleJournalUpdate} journal={this.state.journal} />
+        <RandomDialog handleGoToVolume={this.handleVolumeChange} journal={this.state.journal} />
       </div>
     )
   }
@@ -180,6 +218,73 @@ class Navigation extends React.Component {
             </ul>
           </div>
         </div>
+      </div>
+    )
+  }
+
+}
+
+class Search extends React.Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      query: '',
+      volume: 0
+    };
+
+    this.volumeChanged = this.volumeChanged.bind(this);
+    this.queryChanged = this.queryChanged.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
+    this.handleSearchStatus = this.handleSearchStatus.bind(this);
+  }
+
+  volumeChanged(e) {
+    this.setState({
+      volume: e.target.value
+    });
+  }
+
+  queryChanged(e) {
+    this.setState({
+      query: e.target.value
+    });
+  }
+
+  onSubmit(e) {
+    e.preventDefault();
+    var searchQuery = {};
+    searchQuery.q = this.state.query;
+    searchQuery.v = this.state.volume;
+    this.props.onSubmit(searchQuery);
+  }
+
+  handleSearchStatus(e) {
+    e.preventDefault();
+    this.setState({ query: '', volume: 0 });
+    this.props.handleSearchStatus();
+  }
+
+  render() {
+    let volumes = this.props.volumesWithStartDate.map(function(volume) {
+      return <option value={volume.volume}>Volume {volume.volume} {volume.publishDate}</option>
+    });
+
+    return (
+      <div>
+        <form className="form-inline">
+          <div className="input-group">
+            <span className="input-group-addon"><span className="glyphicon glyphicon-search"></span></span>
+            <input type="text" className="form-control" name="query" value={this.state.query} onChange={this.queryChanged} placeholder="Search..."/>
+          </div>
+          <select name="volume" className="form-control" value={this.state.volume} onChange={this.volumeChanged}>
+            <option value="0">All Volumes</option>
+            {volumes}
+          </select>
+          <button className="form-control btn btn-primary" onClick={this.onSubmit}>Search</button>
+          {this.props.isSearchActive ? <button className="form-control btn btn-default" onClick={this.handleSearchStatus}>Cancel</button> : null}
+        </form>
       </div>
     )
   }
@@ -240,7 +345,7 @@ class Journal extends React.Component {
           <div className="panel-body">
             {contents}
           </div>
-          <div className="panel-footer">
+          <div className={!events ? "hidden" : "panel-footer"}>
             <ul>
               {events}
             </ul>
@@ -287,7 +392,7 @@ class SpecialEventsItem extends React.Component {
     let events = splitNewLineAndEncloseWithTagWithClass(this.props.journal.specialEvents, "li", "");
 
     return (
-      <div>
+      <div className={!this.props.journal.specialEvents ? "hidden" : ""}>
         <p><em>Day {this.props.journal.day} | {this.props.journal.publishDate} by: {this.props.journal.user.firstName} {this.props.journal.user.lastName}</em></p>
         <ul>
           {events}
@@ -340,6 +445,12 @@ class CreateDialog extends React.Component {
 
     this.props.onSubmit(journal);
     this.setState({ publishDate: '', contents: '', specialEvents: '' });
+  }
+
+  componentDidMount() {
+    $("#create-dialog").on("shown.bs.modal", function(e) {
+      $("#create-dialog textarea[name='contents']").focus();
+    });
   }
 
   render() {
@@ -430,6 +541,12 @@ class UpdateDialog extends React.Component {
     this.setState({ contents: '', specialEvents: '' });
   }
 
+  componentDidMount() {
+    $("#update-dialog").on("shown.bs.modal", function(e) {
+      $("#update-dialog textarea[name='contents']").focus();
+    });
+  }
+
   componentWillReceiveProps(nextProps) {
     this.setState({
       contents: nextProps.journal.contents,
@@ -479,7 +596,62 @@ class UpdateDialog extends React.Component {
   }
 }
 
+class RandomDialog extends React.Component {
+
+  constructor(props) {
+    super(props);
+
+    this.handleGoToVolume = this.handleGoToVolume.bind(this);
+  }
+
+  handleGoToVolume(e) {
+    e.preventDefault();
+    this.props.handleGoToVolume(this.props.journal.volume);
+  }
+
+  componentDidMount() {
+    $("#random-dialog").on("shown.bs.modal", function(e) {
+      $("#random-dialog button").focus();
+    });
+  }
+
+  render() {
+    let contents = splitNewLineAndEncloseWithTagWithClass(this.props.journal.contents, "p");
+    let events = splitNewLineAndEncloseWithTagWithClass(this.props.journal.specialEvents, "li");
+
+    return (
+      <div>
+        <div className="modal fade" id="random-dialog" tabindex="-1" role="dialog">
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content">
+              <div className="modal-header">
+                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span></button>
+                <h4 className="modal-title">
+                  Vol. {this.props.journal.volume} Day {this.props.journal.day} | {this.props.journal.publishDate}
+                  {!this.props.journal.user ? null : <span> by: {this.props.journal.user.firstName} {this.props.journal.user.lastName}</span> }
+                </h4>
+              </div>
+
+              <div className="modal-body">
+                {contents}
+                <hr/>
+                <ul>
+                  {events}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
 function splitNewLineAndEncloseWithTagWithClass(input, tag, cssClass = null) {
+  if(input == null || input == '') {
+    return null;
+  }
   var input = input.split(/\r?\n/);
 
   switch(tag) {
