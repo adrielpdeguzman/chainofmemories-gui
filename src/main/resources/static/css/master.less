@@ -22,7 +22,7 @@ a {
 body {
   background-color: @brand-background-color;
   color: @text-color;
-  font-family: @font-family-base;
+  font-family: @font-family-base !important;
   margin: (@nav-height + 10) 0 @footer-height;
 }
 
@@ -66,6 +66,24 @@ footer {
 
 .btn-link:hover {
   text-decoration: none;
+}
+
+.journal {
+
+  p {
+    text-align: justify;
+    text-indent: 12pt;
+  }
+}
+
+.modal {
+  p {
+      text-align: justify !important;
+      text-indent: 12pt !important;
+  }
+  .modal-title {
+    color: @brand-color;
+  }
 }
 
 .panel {
