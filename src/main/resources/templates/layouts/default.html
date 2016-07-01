@@ -1,32 +1,39 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title layout:title-pattern="$DECORATOR_TITLE :: $CONTENT_TITLE">Chain
-  of Memories</title>
-<link href="#" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}"
-  rel="stylesheet" media="screen" />
-<link href="#" th:href="@{/css/master.less}" rel="stylesheet/less"
-  media="screen" />
-<script src="#" th:src="@{/webjars/jquery/jquery.min.js}"></script>
-<script src="#" th:src="@{/webjars/less/less.min.js}"></script>
-<script src="#" th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
-<script src="#" th:src="@{/webjars/react/react.min.js}"></script>
-<script src="#" th:src="@{/webjars/react/react-dom.min.js}"></script>
-<script src="#" th:src="@{/webjars/babel/browser.min.js}"></script>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <title layout:title-pattern="$DECORATOR_TITLE :: $CONTENT_TITLE">Chain
+    of Memories</title>
+  <link href="#" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}"
+      rel="stylesheet" media="screen"/>
+  <link href="#" th:href="@{/css/master.less}" rel="stylesheet/less"
+      media="screen"/>
+  <script src="#" th:src="@{/webjars/jquery/jquery.min.js}"></script>
+  <script src="#" th:src="@{/webjars/less/less.min.js}"></script>
+  <script src="#" th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+  <script src="#" th:src="@{/webjars/react/react.min.js}"></script>
+  <script src="#" th:src="@{/webjars/react/react-dom.min.js}"></script>
+  <script src="#" th:src="@{/webjars/babel/browser.min.js}"></script>
 </head>
 <body th:inline="text">
-  <div th:replace="layouts/_partials :: nav"></div>
+<div th:replace="layouts/_partials :: nav"></div>
 
-  <div id="main" class="container" layout:fragment="content"></div>
+<div id="main" class="container" layout:fragment="content"></div>
 
-  <div th:replace="layouts/_partials :: footer"></div>
-  <script th:inline="javascript">
+<div th:replace="layouts/_partials :: footer"></div>
+<script th:inline="javascript">
     /* Define global variables from Spring */
     /*<![CDATA[*/
       const API_URL = [[${@environment.getProperty("global.apiUrl")}]];
     /*]]>*/
-  </script>
-  <script src="#" th:src="@{/js/master.js}"></script>
+
+
+
+
+
+
+
+</script>
+<script src="#" th:src="@{/js/master.js}"></script>
 </body>
 </html>

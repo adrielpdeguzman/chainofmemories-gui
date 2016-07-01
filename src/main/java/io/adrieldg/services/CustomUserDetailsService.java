@@ -6,8 +6,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 public class CustomUserDetailsService implements UserDetailsService {
 
-  @Override
-  public UserDetails loadUserByUsername(String arg0) throws UsernameNotFoundException {
+  @Override public UserDetails loadUserByUsername(String arg0) throws UsernameNotFoundException {
     // TODO Auto-generated method stub
     return null;
   }
