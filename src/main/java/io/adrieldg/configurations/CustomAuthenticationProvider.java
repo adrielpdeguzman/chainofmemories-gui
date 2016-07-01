@@ -1,5 +1,7 @@
 package io.adrieldg.configurations;
 
+import java.util.ArrayList;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -11,15 +13,15 @@ import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-
 @Component
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
-  @Autowired @Qualifier("myRestTemplate") private OAuth2RestOperations restTemplate;
+  @Autowired
+  @Qualifier("myRestTemplate")
+  private OAuth2RestOperations restTemplate;
 
-  @Override public Authentication authenticate(Authentication authentication)
-      throws AuthenticationException {
+  @Override
+  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
     String username = authentication.getName();
     String password = authentication.getCredentials().toString();
 
@@ -36,7 +38,8 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     return new UsernamePasswordAuthenticationToken(username, password, new ArrayList<>());
   }
 
-  @Override public boolean supports(Class<?> authentication) {
+  @Override
+  public boolean supports(Class<?> authentication) {
     return authentication.equals(UsernamePasswordAuthenticationToken.class);
   }
 

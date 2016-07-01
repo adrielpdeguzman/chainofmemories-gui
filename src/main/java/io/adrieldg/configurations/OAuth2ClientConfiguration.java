@@ -1,5 +1,7 @@
 package io.adrieldg.configurations;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -17,26 +19,33 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.web.util.DefaultUriTemplateHandler;
 import org.springframework.web.util.UriTemplateHandler;
 
-import java.util.Arrays;
-
 @EnableOAuth2Client
 @Configuration
 public class OAuth2ClientConfiguration {
-  @Value("${oauth2.clientId}") private String clientId;
-  @Value("${oauth2.clientSecret}") private String clientSecret;
-  @Value("${oauth2.accessTokenUri}") private String accessTokenUri;
-  @Value("${oauth2.grantType}") private String grantType;
-  @Value("${oauth2.scope}") private String[] scope;
-  @Value("${global.apiUrl}") private String apiUrl;
 
-  @Bean public AccessTokenProvider accessTokenProvider() {
+  @Value("${oauth2.clientId}")
+  private String clientId;
+  @Value("${oauth2.clientSecret}")
+  private String clientSecret;
+  @Value("${oauth2.accessTokenUri}")
+  private String accessTokenUri;
+  @Value("${oauth2.grantType}")
+  private String grantType;
+  @Value("${oauth2.scope}")
+  private String[] scope;
+  @Value("${global.apiUrl}")
+  private String apiUrl;
+
+  @Bean
+  public AccessTokenProvider accessTokenProvider() {
     ResourceOwnerPasswordAccessTokenProvider accessTokenProvider =
         new ResourceOwnerPasswordAccessTokenProvider();
     accessTokenProvider.setRequestFactory(new SimpleClientHttpRequestFactory());
     return accessTokenProvider;
   }
 
-  @Bean public OAuth2ProtectedResourceDetails resource() {
+  @Bean
+  public OAuth2ProtectedResourceDetails resource() {
     ResourceOwnerPasswordResourceDetails resource = new ResourceOwnerPasswordResourceDetails();
     resource.setAccessTokenUri(apiUrl + accessTokenUri);
     resource.setClientId(clientId);
@@ -46,14 +55,17 @@ public class OAuth2ClientConfiguration {
     return resource;
   }
 
-  @Bean public UriTemplateHandler uriTemplateHandler() {
+  @Bean
+  public UriTemplateHandler uriTemplateHandler() {
     DefaultUriTemplateHandler uriTemplateHandler = new DefaultUriTemplateHandler();
     uriTemplateHandler.setBaseUrl(apiUrl);
 
     return uriTemplateHandler;
   }
 
-  @Bean @Qualifier("myRestTemplate") public OAuth2RestOperations myRestTemplate() {
+  @Bean
+  @Qualifier("myRestTemplate")
+  public OAuth2RestOperations myRestTemplate() {
     OAuth2RestTemplate template = new OAuth2RestTemplate(resource(),
         new DefaultOAuth2ClientContext(new DefaultAccessTokenRequest()));
     template.setAccessTokenProvider(accessTokenProvider());

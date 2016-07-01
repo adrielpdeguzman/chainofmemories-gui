@@ -7,7 +7,7 @@ const URL = {
   findByContents          : "search/findByContents?q={0}",
   findRandom              : "search/findRandom",
 };
-const initialVolume = document.getElementById('react').dataset.volume;
+const initialVolume = document.getElementById("react").dataset.volume;
 Object.keys(URL).forEach(function (key) {
   URL[key] = BASE_URL + URL[key];
 });
@@ -17,7 +17,7 @@ function splitNewLineAndEncloseWithTagWithClass(input, tag, cssClass = null) {
     return null;
   }
   let lines;
-  input = input.split(/\r?\n/);
+  input = input.split(/\r?\n/).filter(Boolean);
 
   switch(tag) {
     case "li":
@@ -48,12 +48,16 @@ function splitNewLineAndEncloseWithTagWithClass(input, tag, cssClass = null) {
   return lines;
 }
 
+function throwForbiddenError(xhr, ajaxOptions, thrownError) {
+  window.location = window.location.pathname + "/login";
+}
+
 class App extends React.Component {
 
   constructor(props) {
 		super(props);
 		this.state = {
-		  volume: initialVolume, principal: '',
+		  volume: initialVolume, principal: "",
 		  journals: [], journal: [],
 		  datesWithoutEntry: [], volumesWithStartDate: [],
 		  isSearchActive: false
@@ -85,12 +89,12 @@ class App extends React.Component {
 	handleJournalCreate(journal) {
 	  $.ajax({
       url: BASE_URL,
-      dataType: 'json',
-      contentType: 'application/json',
-      type: 'POST',
+      dataType: "json",
+      contentType: "application/json",
+      type: "POST",
       data: JSON.stringify(journal),
       success: function(data) {
-        $('#create-dialog').modal('hide');
+        $("#create-dialog").modal("hide");
         this.loadJournalsByVolume();
         this.loadDatesWithoutEntry();
         this.loadVolumesWithStartDate();
@@ -101,12 +105,12 @@ class App extends React.Component {
 	handleJournalUpdate(journal) {
     $.ajax({
       url: this.state.journal._links.self.href,
-      dataType: 'json',
-      contentType: 'application/json',
-      type: 'PATCH',
+      dataType: "json",
+      contentType: "application/json",
+      type: "PATCH",
       data: JSON.stringify(journal),
       success: function(data) {
-        $('#update-dialog').modal('hide');
+        $("#update-dialog").modal("hide");
         this.loadJournalsByVolume();
       }.bind(this)
     });
@@ -148,7 +152,12 @@ class App extends React.Component {
       url: URL.getVolumesWithStartDate,
       success: function(data) {
         this.setState({ volumesWithStartDate: data });
-      }.bind(this)
+      }.bind(this),
+      error: function (xhr, ajaxOptions, thrownError) {
+        if (xhr.status==403) {
+          throwForbiddenError(xhr, ajaxOptions, thrownError);
+        }
+      }
     });
   }
 
@@ -157,7 +166,12 @@ class App extends React.Component {
       url: URL.getDatesWithoutEntry,
       success: function(data) {
         this.setState({ datesWithoutEntry: data });
-      }.bind(this)
+      }.bind(this),
+      error: function (xhr, ajaxOptions, thrownError) {
+        if (xhr.status==403) {
+          throwForbiddenError(xhr, ajaxOptions, thrownError);
+        }
+      }
     });
   }
 
@@ -166,16 +180,26 @@ class App extends React.Component {
       url: URL.findByVolume.format(this.state.volume),
       success: function(data) {
         this.setState({ journals: data._embedded.journals });
-      }.bind(this)
+      }.bind(this),
+      error: function (xhr, ajaxOptions, thrownError) {
+        if (xhr.status==403) {
+          throwForbiddenError(xhr, ajaxOptions, thrownError);
+        }
+      }
     });
 	}
 
 	loadPrincipal() {
 	  $.ajax({
-      url: API_URL + 'me',
+      url: API_URL + "me",
       success: function(data) {
         this.setState({ principal: data.name });
-      }.bind(this)
+      }.bind(this),
+      error: function (xhr, ajaxOptions, thrownError) {
+        if (xhr.status==403) {
+          throwForbiddenError(xhr, ajaxOptions, thrownError);
+        }
+      }
     });
 	}
 
@@ -398,6 +422,7 @@ class Journal extends React.Component {
           <div className="panel-heading">
             <h2 className="panel-title text-uppercase">
               Day {this.props.journal.day} | {this.props.journal.publishDate}
+              {updateButton}
             </h2>
             <h4 className="panel-title">
               Posted by: {this.props.journal.user.firstName} {this.props.journal.user.lastName}
@@ -603,7 +628,7 @@ class UpdateDialog extends React.Component {
     journal.contents = contents;
     journal.specialEvents = specialEvents;
 
-    this.props.onSubmit(journal);
+    this.props.onJournalUpdate(journal);
     this.setState({ contents: "", specialEvents: "" });
   }
 
@@ -709,5 +734,5 @@ class RandomDialog extends React.Component {
 
 ReactDOM.render(
   <App />,
-  document.getElementById('react')
+  document.getElementById("react")
 );

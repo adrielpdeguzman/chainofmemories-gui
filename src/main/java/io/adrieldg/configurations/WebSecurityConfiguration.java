@@ -1,5 +1,12 @@
 package io.adrieldg.configurations;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,28 +21,27 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
+
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-  @Autowired private CustomAuthenticationProvider authProvider;
+  @Autowired
+  private CustomAuthenticationProvider authProvider;
 
-  @Override protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+  @Override
+  protected void configure(AuthenticationManagerBuilder auth) throws Exception {
     auth.authenticationProvider(authProvider);
   }
 
-  @Override public void configure(WebSecurity web) throws Exception {
+  @Override
+  public void configure(WebSecurity web) throws Exception {
     web.ignoring().antMatchers("/js/**", "/css/**", "/img/**", "/webjars/**");
   }
 
-  @Override protected void configure(HttpSecurity http) throws Exception {
+  @Override
+  protected void configure(HttpSecurity http) throws Exception {
     /*@formatter:off*/
     http.authorizeRequests()
         .antMatchers("/", "/changelogs")
@@ -55,7 +61,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     /*@formatter:on*/
   }
 
-  @Bean public AuthenticationSuccessHandler addAccessTokenToCookieAfterAuthenticationSucess() {
+  @Bean
+  public AuthenticationSuccessHandler addAccessTokenToCookieAfterAuthenticationSucess() {
     return new SavedRequestAwareAuthenticationSuccessHandler() {
 
       @Override
