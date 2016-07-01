@@ -1,34 +1,71 @@
-const JOURNAL_URL = API_URL + "journals/";
-const FINDBYVOLUME_URL = JOURNAL_URL + 'search/findByVolume?v={0}';
-const GETVOLUMES_URL = JOURNAL_URL + 'search/getVolumesWithStartDate';
-const GETDATES_URL = JOURNAL_URL + 'search/getDatesWithoutEntry';
-const SEARCHVC_URL = JOURNAL_URL + 'search/findByContentsAndVolume?q={0}&v={1}';
-const SEARCHC_URL = JOURNAL_URL + 'search/findByContents?q={0}';
-const RANDOM_URL = JOURNAL_URL + 'search/findRandom';
+const BASE_URL = API_URL + "journals/";
+const URL = {
+  findByVolume            : "search/findByVolume?v={0}",
+  getVolumesWithStartDate : "search/getVolumesWithStartDate",
+  getDatesWithoutEntry    : "search/getDatesWithoutEntry",
+  findByContentsAndVolume : "search/findByContentsAndVolume?q={0}&v={1}",
+  findByContents          : "search/findByContents?q={0}",
+  findRandom              : "search/findRandom",
+};
+const initialVolume = document.getElementById('react').dataset.volume;
+Object.keys(URL).forEach(function (key) {
+  URL[key] = BASE_URL + URL[key];
+});
 
-var initialVolume = document.getElementById('react').dataset.volume;
+function splitNewLineAndEncloseWithTagWithClass(input, tag, cssClass = null) {
+  if (input == null || input == "") {
+    return null;
+  }
+  let lines;
+  input = input.split(/\r?\n/);
+
+  switch(tag) {
+    case "li":
+      lines = input.map(
+        line => <li className={cssClass}>{line}</li>
+      );
+      break;
+    case "div":
+      lines = input.map(
+        line => <div className={cssClass}>{line}</div>
+      );
+      break;
+    case "p":
+      lines = input.map(
+        line => <p className={cssClass}>{line}</p>
+      );
+      break;
+    case "span":
+      lines = input.map(
+        line => <span className={cssClass}>{line}</span>
+      );
+      break;
+    default:
+      lines = input.map(
+        line => {line}
+      );
+  }
+  return lines;
+}
 
 class App extends React.Component {
 
   constructor(props) {
 		super(props);
 		this.state = {
-		  volume: initialVolume,
-		  journals: [],
-		  datesWithoutEntry: [],
-		  volumesWithStartDate: [],
-		  journal: [],
-		  principal: '',
+		  volume: initialVolume, principal: '',
+		  journals: [], journal: [],
+		  datesWithoutEntry: [], volumesWithStartDate: [],
 		  isSearchActive: false
 		};
 
     this.handleUpdateDialogShow = this.handleUpdateDialogShow.bind(this);
+		this.handleRandomDialogShow = this.handleRandomDialogShow.bind(this);
     this.handleJournalCreate = this.handleJournalCreate.bind(this);
     this.handleJournalUpdate = this.handleJournalUpdate.bind(this);
+		this.handleSearchSubmit = this.handleSearchSubmit.bind(this);
 		this.handleVolumeChange = this.handleVolumeChange.bind(this);
-		this.handleSearchQuery = this.handleSearchQuery.bind(this);
-		this.handleSearchStatus = this.handleSearchStatus.bind(this);
-		this.handleRandomActivate = this.handleRandomActivate.bind(this);
+		this.handleSearchChange = this.handleSearchChange.bind(this);
 	}
 
   handleUpdateDialogShow(journal) {
@@ -38,7 +75,7 @@ class App extends React.Component {
 	handleVolumeChange(volume) {
 	  this.setState({
 	    volume: volume
-	  },function() {
+	  }, function() {
       this.loadJournalsByVolume();
       this.loadPrincipal();
       updateURL(volume);
@@ -47,7 +84,7 @@ class App extends React.Component {
 
 	handleJournalCreate(journal) {
 	  $.ajax({
-      url: JOURNAL_URL,
+      url: BASE_URL,
       dataType: 'json',
       contentType: 'application/json',
       type: 'POST',
@@ -70,56 +107,54 @@ class App extends React.Component {
       data: JSON.stringify(journal),
       success: function(data) {
         $('#update-dialog').modal('hide');
-        this.setState({ isSearchActive: false });
         this.loadJournalsByVolume();
-        this.loadDatesWithoutEntry();
-        this.loadVolumesWithStartDate();
       }.bind(this)
     });
   }
 
-  loadVolumesWithStartDate() {
-    $.ajax({
-      url: GETVOLUMES_URL,
-      success: function(data) {
-        this.setState({ volumesWithStartDate: data });
-      }.bind(this)
-    });
-  }
+  handleSearchSubmit(searchQuery) {
+    let searchURL;
 
-  handleSearchQuery(searchQuery) {
-    var url;
     if (searchQuery.v == 0) {
-      url = SEARCHC_URL.format(searchQuery.q);
+      searchURL = URL.findByContents.format(searchQuery.q);
+    } else {
+      searchURL = URL.findByContentsAndVolume.format(searchQuery.q, searchQuery.v);
     }
-    else {
-      url = SEARCHVC_URL.format(searchQuery.q, searchQuery.v);
-    }
+
     $.ajax({
-      url: url,
+      url: searchURL,
       success: function(data) {
         this.setState({ journals: data._embedded.journals, isSearchActive: true });
       }.bind(this)
     });
   }
 
-  handleRandomActivate() {
+  handleRandomDialogShow() {
       $.ajax({
-        url: RANDOM_URL,
+        url: URL.findRandom,
         success: function(data) {
           this.setState({ journal: data });
         }.bind(this)
       });
     }
 
-  handleSearchStatus() {
+  handleSearchChange() {
     this.setState({ isSearchActive: !this.state.isSearchActive });
     this.loadJournalsByVolume();
   }
 
+  loadVolumesWithStartDate() {
+    $.ajax({
+      url: URL.getVolumesWithStartDate,
+      success: function(data) {
+        this.setState({ volumesWithStartDate: data });
+      }.bind(this)
+    });
+  }
+
   loadDatesWithoutEntry()  {
     $.ajax({
-      url: GETDATES_URL,
+      url: URL.getDatesWithoutEntry,
       success: function(data) {
         this.setState({ datesWithoutEntry: data });
       }.bind(this)
@@ -128,7 +163,7 @@ class App extends React.Component {
 
 	loadJournalsByVolume() {
 	  $.ajax({
-      url: FINDBYVOLUME_URL.format(this.state.volume),
+      url: URL.findByVolume.format(this.state.volume),
       success: function(data) {
         this.setState({ journals: data._embedded.journals });
       }.bind(this)
@@ -145,35 +180,55 @@ class App extends React.Component {
 	}
 
 	componentDidMount() {
+    this.loadDatesWithoutEntry();
     this.loadJournalsByVolume();
     this.loadPrincipal();
-    this.loadDatesWithoutEntry();
     this.loadVolumesWithStartDate();
 	}
 
   render() {
+    let hidden = "";
+    let navigationComponent = null;
+    let specialEventsListComponent = null;
+
+    if (this.state.isSearchActive) {
+      hidden = "hidden";
+    } else {
+      navigationComponent = <Navigation journals={this.state.journals}
+                              onVolumeChange={this.handleVolumeChange}
+                              volumesWithStartDate={this.state.volumesWithStartDate} />;
+      specialEventsListComponent = <SpecialEventsList journals={this.state.journals} />;
+    }
+
     return (
       <div>
-        <div className={this.state.isSearchActive ? 'hidden' : ''}>
-          <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#create-dialog"
-            disabled={this.state.datesWithoutEntry.length == 0}>
-            <span className="glyphicon glyphicon-pencil"></span> Write</button>
-          <button className="btn btn-default" onClick={this.handleRandomActivate} data-toggle="modal" data-target="#random-dialog">
-            <span className="glyphicon glyphicon-asterisk"></span> Random</button>
+        <div className={hidden}>
+          <button type="button" className="btn btn-primary" data-toggle="modal"
+            data-target="#create-dialog" disabled={this.state.datesWithoutEntry.length == 0}>
+          <span className="glyphicon glyphicon-pencil"></span> Write</button>
+          <button className="btn btn-default" onClick={this.handleRandomDialogShow}
+            data-toggle="modal" data-target="#random-dialog">
+          <span className="glyphicon glyphicon-asterisk"></span> Random</button>
         </div>
-        <Search volumesWithStartDate={this.state.volumesWithStartDate} onSubmit={this.handleSearchQuery}
-         isSearchActive={this.state.isSearchActive} handleSearchStatus={this.handleSearchStatus}/>
-        {!this.state.isSearchActive ? <Navigation journals={this.state.journals} onVolumeChange={this.handleVolumeChange}
-         volumesWithStartDate={this.state.volumesWithStartDate} />: null}
-        <JournalList journals={this.state.journals} onClickUpdate={this.handleUpdateDialogShow} principal={this.state.principal}/>
-        {!this.state.isSearchActive ? <SpecialEventsList journals={this.state.journals} /> : null}
-        <CreateDialog onSubmit={this.handleJournalCreate} datesWithoutEntry={this.state.datesWithoutEntry} />
-        <UpdateDialog onSubmit={this.handleJournalUpdate} journal={this.state.journal} />
-        <RandomDialog handleGoToVolume={this.handleVolumeChange} journal={this.state.journal} />
+        <Search
+          volumesWithStartDate={this.state.volumesWithStartDate}
+          onSearchSubmit={this.handleSearchSubmit}
+          isSearchActive={this.state.isSearchActive}
+          handleSearchChange={this.handleSearchChange} />
+        {navigationComponent}
+        <JournalList journals={this.state.journals} onJournalUpdate={this.handleUpdateDialogShow}
+          principal={this.state.principal}/>
+        {specialEventsListComponent}
+        <CreateDialog
+          onJournalCreate={this.handleJournalCreate}
+          datesWithoutEntry={this.state.datesWithoutEntry} />
+        <UpdateDialog
+          onJournalUpdate={this.handleJournalUpdate}
+          journal={this.state.journal} />
+        <RandomDialog journal={this.state.journal} />
       </div>
     )
   }
-
 }
 
 class Navigation extends React.Component {
@@ -181,24 +236,23 @@ class Navigation extends React.Component {
   constructor(props) {
     super(props);
 
-    this.volumeChanged = this.volumeChanged.bind(this);
+    this.handleVolumeChange = this.handleVolumeChange.bind(this);
   }
 
-  volumeChanged(e) {
+  handleVolumeChange(e) {
     this.props.onVolumeChange(e.target.value);
   }
 
   render() {
     let volumes = this.props.volumesWithStartDate.map(function(volume) {
-      var isSelected = (initialVolume == volume.volume) ? 'selected' : '';
+      let isSelected = (initialVolume == volume.volume) ? "selected" : "";
       return <option value={volume.volume} selected={isSelected}>Volume {volume.volume} {volume.publishDate}</option>
     });
-    var previousDay = 0;
-    let links = this.props.journals.map(function(link){
-      if(link.day == previousDay) {
+    let previousDay = 0;
+    let links = this.props.journals.map(function(link) {
+      if (link.day == previousDay) {
         return;
-      }
-      else {
+      } else {
         previousDay = link.day;
         return <li><a href={"#" + link.day + "-" + link.user.firstName}>Day {link.day} | {link.publishDate}</a></li>;
       }
@@ -208,7 +262,7 @@ class Navigation extends React.Component {
       <div>
         <div className="panel panel-default">
           <div className="panel-heading">
-            <select name="volume" className="form-control" onChange={this.volumeChanged}>
+            <select name="volume" className="form-control" onChange={this.handleVolumeChange}>
               {volumes}
             </select>
           </div>
@@ -231,60 +285,62 @@ class Search extends React.Component {
     super(props);
 
     this.state = {
-      query: '',
+      query: "",
       volume: 0
     };
 
-    this.volumeChanged = this.volumeChanged.bind(this);
-    this.queryChanged = this.queryChanged.bind(this);
-    this.onSubmit = this.onSubmit.bind(this);
-    this.handleSearchStatus = this.handleSearchStatus.bind(this);
+    this.handleQueryChange = this.handleQueryChange.bind(this);
+    this.handleSearchChange = this.handleSearchChange.bind(this);
+    this.handleVolumeChange = this.handleVolumeChange.bind(this);
+    this.onSearchSubmit = this.onSearchSubmit.bind(this);
   }
 
-  volumeChanged(e) {
-    this.setState({
-      volume: e.target.value
-    });
+  handleVolumeChange(e) {
+    this.setState({ volume: e.target.value });
   }
 
-  queryChanged(e) {
-    this.setState({
-      query: e.target.value
-    });
+  handleQueryChange(e) {
+    this.setState({ query: e.target.value });
   }
 
-  onSubmit(e) {
+  onSearchSubmit(e) {
     e.preventDefault();
-    var searchQuery = {};
+    let searchQuery = {};
     searchQuery.q = this.state.query;
     searchQuery.v = this.state.volume;
-    this.props.onSubmit(searchQuery);
+    this.props.onSearchSubmit(searchQuery);
   }
 
-  handleSearchStatus(e) {
+  handleSearchChange(e) {
     e.preventDefault();
-    this.setState({ query: '', volume: 0 });
-    this.props.handleSearchStatus();
+    this.setState({ query: "", volume: 0 });
+    this.props.handleSearchChange();
   }
 
   render() {
-    let volumes = this.props.volumesWithStartDate.map(function(volume) {
-      return <option value={volume.volume}>Volume {volume.volume} {volume.publishDate}</option>
-    });
+    let volumes = this.props.volumesWithStartDate.map(volume =>
+      <option value={volume.volume}>Volume {volume.volume} {volume.publishDate}</option>
+    );
+    let cancelButton = null;
+    if (this.props.isSearchActive) {
+      cancelButton = <button className="form-control btn btn-default"
+                      onClick={this.handleSearchChange}>Cancel</button>
+    }
 
     return (
       <div>
         <form className="form-inline">
           <div className="input-group">
             <span className="input-group-addon"><span className="glyphicon glyphicon-search"></span></span>
-            <input type="text" className="form-control" name="query" value={this.state.query} onChange={this.queryChanged} placeholder="Search..."/>
+            <input type="text" className="form-control" name="query" value={this.state.query}
+              onChange={this.handleQueryChange} placeholder="Search..."/>
           </div>
-          <select name="volume" className="form-control" value={this.state.volume} onChange={this.volumeChanged}>
+          <select name="volume" className="form-control" value={this.state.volume} onChange={this.handleVolumeChange}>
             <option value="0">All Volumes</option>
             {volumes}
           </select>
-          <button className="form-control btn btn-primary" onClick={this.onSubmit}>Search</button>
-          {this.props.isSearchActive ? <button className="form-control btn btn-default" onClick={this.handleSearchStatus}>Cancel</button> : null}
+          <button className="form-control btn btn-primary" onClick={this.onSearchSubmit}>Search</button>
+          {cancelButton}
         </form>
       </div>
     )
@@ -299,8 +355,11 @@ class JournalList extends React.Component {
 	}
 
   render() {
-    var journals = this.props.journals.map(
-      journal => <Journal key={journal._links.self.href} journal={journal} onClickUpdate={this.props.onClickUpdate} principal={this.props.principal}/>
+    let journals = this.props.journals.map(journal =>
+      <Journal
+        key={journal._links.self.href} journal={journal}
+        onJournalUpdate={this.props.onJournalUpdate}
+        principal={this.props.principal} />
     );
 
     return (
@@ -309,7 +368,6 @@ class JournalList extends React.Component {
       </div>
     )
   }
-
 }
 
 class Journal extends React.Component {
@@ -321,22 +379,24 @@ class Journal extends React.Component {
 	}
 
 	handleModalShow() {
-    this.props.onClickUpdate(this.props.journal);
+    this.props.onJournalUpdate(this.props.journal);
 	}
 
   render() {
     let events = splitNewLineAndEncloseWithTagWithClass(this.props.journal.specialEvents, "li");
     let contents = splitNewLineAndEncloseWithTagWithClass(this.props.journal.contents, "p");
+    let updateButton = null;
+    if (this.props.principal == this.props.journal.user.username) {
+      updateButton = <button onClick={this.handleModalShow} className="btn btn-default pull-right"
+              data-toggle="modal" data-target="#update-dialog"><span className="glyphicon glyphicon-edit"></span></button>
+    }
+
     return (
       <div>
-        <div id={this.props.journal.day + "-" + this.props.journal.user.firstName} className="journal panel panel-default">
+        <div id={this.props.journal.day + "-" + this.props.journal.user.firstName}
+          className="journal panel panel-default">
           <div className="panel-heading">
             <h2 className="panel-title text-uppercase">
-              {this.props.principal == this.props.journal.user.username ?
-              <button onClick={this.handleModalShow} className="btn btn-default pull-right"
-              data-toggle="modal" data-target="#update-dialog"><span className="glyphicon glyphicon-edit"></span></button>
-              : null
-              }
               Day {this.props.journal.day} | {this.props.journal.publishDate}
             </h2>
             <h4 className="panel-title">
@@ -364,8 +424,8 @@ class SpecialEventsList extends React.Component {
   }
 
   render() {
-    var events = this.props.journals.map(
-      journal => <SpecialEventsItem journal={journal} />
+    let events = this.props.journals.map(journal =>
+      <SpecialEventsItem journal={journal} />
     );
 
     return (
@@ -394,7 +454,8 @@ class SpecialEventsItem extends React.Component {
 
     return (
       <div className={!this.props.journal.specialEvents ? "hidden" : ""}>
-        <p><em>Day {this.props.journal.day} | {this.props.journal.publishDate} by: {this.props.journal.user.firstName} {this.props.journal.user.lastName}</em></p>
+        <p><em>Day {this.props.journal.day} | {this.props.journal.publishDate} by:
+          {this.props.journal.user.firstName} {this.props.journal.user.lastName}</em></p>
         <ul>
           {events}
         </ul>
@@ -407,16 +468,17 @@ class CreateDialog extends React.Component {
 
   constructor(props) {
     super(props);
+
     this.state = {
-      publishDate: '',
-      contents: '',
-      specialEvents: ''
+      publishDate: "",
+      contents: "",
+      specialEvents: ""
     };
 
-    this.handleDateChange = this.handleDateChange.bind(this);
     this.handleContentsChange = this.handleContentsChange.bind(this);
+    this.handleDateChange = this.handleDateChange.bind(this);
+    this.handleJournalCreate = this.handleJournalCreate.bind(this);
     this.handleSpecialEventsChange = this.handleSpecialEventsChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   handleDateChange(e) {
@@ -431,21 +493,22 @@ class CreateDialog extends React.Component {
     this.setState({ specialEvents: e.target.value });
   }
 
-  handleSubmit(e) {
+  handleJournalCreate(e) {
     e.preventDefault();
-    var journal = {};
-    var contents = this.state.contents.trim();
-    var specialEvents = this.state.specialEvents.trim();
-    if(!contents) {
+    let journal = {};
+    let contents = this.state.contents.trim();
+    let specialEvents = this.state.specialEvents.trim();
+
+    if (!contents) {
       return;
     }
 
-    journal.publishDate = this.state.publishDate || this.props.datesWithoutEntry[0];
     journal.contents = contents;
+    journal.publishDate = this.state.publishDate || this.props.datesWithoutEntry[0];
     journal.specialEvents = specialEvents;
 
-    this.props.onSubmit(journal);
-    this.setState({ publishDate: '', contents: '', specialEvents: '' });
+    this.props.onJournalCreate(journal);
+    this.setState({ publishDate: "", contents: "", specialEvents: "" });
   }
 
   componentDidMount() {
@@ -455,9 +518,10 @@ class CreateDialog extends React.Component {
   }
 
   render() {
-    let dates = this.props.datesWithoutEntry.map(
-      date => <option value={date}>{date}</option>
+    let dates = this.props.datesWithoutEntry.map(date =>
+      <option value={date}>{date}</option>
     );
+
     return (
       <div>
         <div className="modal fade" id="create-dialog" tabindex="-1" role="dialog">
@@ -492,7 +556,7 @@ class CreateDialog extends React.Component {
               </div>
 
               <div className="modal-footer">
-                <input type="submit" onClick={this.handleSubmit} className="btn btn-primary"
+                <input type="submit" onClick={this.handleJournalCreate} className="btn btn-primary"
                 disabled={!this.state.contents} value="Create Journal Entry"/>
                 <button type="button" className="btn btn-default" data-dismiss="modal">Cancel</button>
               </div>
@@ -508,14 +572,15 @@ class UpdateDialog extends React.Component {
 
   constructor(props) {
     super(props);
+
     this.state = {
-      contents: '',
-      specialEvents: ''
+      contents: "",
+      specialEvents: ""
     };
 
     this.handleContentsChange = this.handleContentsChange.bind(this);
+    this.handleJournalUpdate = this.handleJournalUpdate.bind(this);
     this.handleSpecialEventsChange = this.handleSpecialEventsChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   handleContentsChange(e) {
@@ -526,12 +591,12 @@ class UpdateDialog extends React.Component {
     this.setState({ specialEvents: e.target.value });
   }
 
-  handleSubmit(e) {
+  handleJournalUpdate(e) {
     e.preventDefault();
-    var journal = {};
-    var contents = this.state.contents.trim();
-    var specialEvents = this.state.specialEvents.trim();
-    if(!contents) {
+    let journal = {};
+    let contents = this.state.contents.trim();
+    let specialEvents = this.state.specialEvents.trim();
+    if (!contents) {
       return;
     }
 
@@ -539,7 +604,7 @@ class UpdateDialog extends React.Component {
     journal.specialEvents = specialEvents;
 
     this.props.onSubmit(journal);
-    this.setState({ contents: '', specialEvents: '' });
+    this.setState({ contents: "", specialEvents: "" });
   }
 
   componentDidMount() {
@@ -585,7 +650,7 @@ class UpdateDialog extends React.Component {
               </div>
 
               <div className="modal-footer">
-                <input type="submit" onClick={this.handleSubmit} className="btn btn-primary"
+                <input type="submit" onClick={this.handleJournalUpdate} className="btn btn-primary"
                 disabled={!this.state.contents} value="Update Journal Entry"/>
                 <button type="button" className="btn btn-default" data-dismiss="modal">Cancel</button>
               </div>
@@ -601,13 +666,6 @@ class RandomDialog extends React.Component {
 
   constructor(props) {
     super(props);
-
-    this.handleGoToVolume = this.handleGoToVolume.bind(this);
-  }
-
-  handleGoToVolume(e) {
-    e.preventDefault();
-    this.props.handleGoToVolume(this.props.journal.volume);
   }
 
   componentDidMount() {
@@ -647,41 +705,6 @@ class RandomDialog extends React.Component {
       </div>
     );
   }
-}
-
-function splitNewLineAndEncloseWithTagWithClass(input, tag, cssClass = null) {
-  if(input == null || input == '') {
-    return null;
-  }
-  var input = input.split(/\r?\n/);
-
-  switch(tag) {
-    case "li":
-      var lines = input.map(
-        line => <li className={cssClass}>{line}</li>
-      );
-      break;
-    case "div":
-      var lines = input.map(
-        line => <div className={cssClass}>{line}</div>
-      );
-      break;
-    case "p":
-      var lines = input.map(
-        line => <p className={cssClass}>{line}</p>
-      );
-      break;
-    case "span":
-      var lines = input.map(
-        line => <span className={cssClass}>{line}</span>
-      );
-      break;
-    default:
-      var lines = input.map(
-        line => {line}
-      );
-  }
-  return lines;
 }
 
 ReactDOM.render(
