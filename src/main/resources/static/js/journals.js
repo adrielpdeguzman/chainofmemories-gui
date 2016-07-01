@@ -70,6 +70,7 @@ class App extends React.Component {
       data: JSON.stringify(journal),
       success: function(data) {
         $('#update-dialog').modal('hide');
+        this.setState({ isSearchActive: false });
         this.loadJournalsByVolume();
         this.loadDatesWithoutEntry();
         this.loadVolumesWithStartDate();
