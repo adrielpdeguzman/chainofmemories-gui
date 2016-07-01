@@ -143,8 +143,13 @@ class App extends React.Component {
     }
 
   handleSearchChange() {
-    this.setState({ isSearchActive: !this.state.isSearchActive });
-    this.loadJournalsByVolume();
+    this.setState({
+      isSearchActive: !this.state.isSearchActive,
+      journals: []
+    });
+    if (this.state.isSearchActive) {
+      this.loadJournalsByVolume();
+    }
   }
 
   loadVolumesWithStartDate() {
@@ -212,37 +217,68 @@ class App extends React.Component {
 
   render() {
     let hidden = "";
+    let shown = "hidden";
     let navigationComponent = null;
     let specialEventsListComponent = null;
+    let searchComponent = null;
 
     if (this.state.isSearchActive) {
       hidden = "hidden";
+      shown = ""
+      searchComponent = <Search
+                          volumesWithStartDate={this.state.volumesWithStartDate}
+                          onSearchSubmit={this.handleSearchSubmit}
+                          handleSearchChange={this.handleSearchChange} />
     } else {
       navigationComponent = <Navigation journals={this.state.journals}
                               onVolumeChange={this.handleVolumeChange}
-                              volumesWithStartDate={this.state.volumesWithStartDate} />;
+                              volumesWithStartDate={this.state.volumesWithStartDate}
+                              volume={this.state.volume} />;
       specialEventsListComponent = <SpecialEventsList journals={this.state.journals} />;
     }
 
     return (
       <div>
-        <div className={hidden}>
-          <button type="button" className="btn btn-primary" data-toggle="modal"
-            data-target="#create-dialog" disabled={this.state.datesWithoutEntry.length == 0}>
-          <span className="glyphicon glyphicon-pencil"></span> Write</button>
-          <button className="btn btn-default" onClick={this.handleRandomDialogShow}
-            data-toggle="modal" data-target="#random-dialog">
-          <span className="glyphicon glyphicon-asterisk"></span> Random</button>
+        <div className="row">
+          <div className="col-md-3">
+            <div className="panel panel-default">
+              <div className={"panel-heading " + hidden}>
+                <div className="btn-group btn-group-justified" role="group">
+                  <div className="btn-group" role="group">
+                    <button type="button" className="btn btn-primary" data-toggle="modal"
+                      data-target="#create-dialog" disabled={this.state.datesWithoutEntry.length == 0}>
+                    <span className="glyphicon glyphicon-pencil"></span></button>
+                  </div>
+                  <div className="btn-group" role="group">
+                    <button className="btn btn-default" onClick={this
+                    .handleRandomDialogShow}
+                      data-toggle="modal" data-target="#random-dialog">
+                    <span className="glyphicon glyphicon-asterisk"></span></button>
+                  </div>
+                  <div className="btn-group" role="group">
+                    <button className="btn btn-default" onClick={this.handleSearchChange}>
+                    <span className="glyphicon glyphicon-search"></span></button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="panel-body">
+                {searchComponent}
+                {navigationComponent}
+              </div>
+
+              <div className={"panel-footer " + shown}>
+                <button className="form-control btn btn-default" onClick={this.handleSearchChange}>
+                Cancel Search</button>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-9">
+            <JournalList journals={this.state.journals} onJournalUpdate={this.handleUpdateDialogShow}
+              principal={this.state.principal}/>
+            {specialEventsListComponent}
+          </div>
         </div>
-        <Search
-          volumesWithStartDate={this.state.volumesWithStartDate}
-          onSearchSubmit={this.handleSearchSubmit}
-          isSearchActive={this.state.isSearchActive}
-          handleSearchChange={this.handleSearchChange} />
-        {navigationComponent}
-        <JournalList journals={this.state.journals} onJournalUpdate={this.handleUpdateDialogShow}
-          principal={this.state.principal}/>
-        {specialEventsListComponent}
         <CreateDialog
           onJournalCreate={this.handleJournalCreate}
           datesWithoutEntry={this.state.datesWithoutEntry} />
@@ -269,8 +305,7 @@ class Navigation extends React.Component {
 
   render() {
     let volumes = this.props.volumesWithStartDate.map(function(volume) {
-      let isSelected = (initialVolume == volume.volume) ? "selected" : "";
-      return <option value={volume.volume} selected={isSelected}>Volume {volume.volume} {volume.publishDate}</option>
+      return <option value={volume.volume}>Volume {volume.volume} {volume.publishDate}</option>
     });
     let previousDay = 0;
     let links = this.props.journals.map(function(link) {
@@ -284,19 +319,15 @@ class Navigation extends React.Component {
 
     return (
       <div>
-        <div className="panel panel-default">
-          <div className="panel-heading">
-            <select name="volume" className="form-control" onChange={this.handleVolumeChange}>
-              {volumes}
-            </select>
-          </div>
-          <div className="panel-body">
-            <ul className="list-unstyled">
-              {links}
-              <li><a href="#outline">Special Events Outline</a></li>
-            </ul>
-          </div>
-        </div>
+        <select name="volume" className="form-control" onChange={this.handleVolumeChange}
+        value={this.props.volume}>
+          {volumes}
+        </select>
+        <div className="vertical-spacer"></div>
+        <ul className="list-unstyled">
+          {links}
+          <li><a href="#outline">Special Events Outline</a></li>
+        </ul>
       </div>
     )
   }
@@ -315,8 +346,8 @@ class Search extends React.Component {
 
     this.handleQueryChange = this.handleQueryChange.bind(this);
     this.handleSearchChange = this.handleSearchChange.bind(this);
+    this.handleSearchSubmit = this.handleSearchSubmit.bind(this);
     this.handleVolumeChange = this.handleVolumeChange.bind(this);
-    this.onSearchSubmit = this.onSearchSubmit.bind(this);
   }
 
   handleVolumeChange(e) {
@@ -327,44 +358,43 @@ class Search extends React.Component {
     this.setState({ query: e.target.value });
   }
 
-  onSearchSubmit(e) {
-    e.preventDefault();
-    let searchQuery = {};
-    searchQuery.q = this.state.query;
-    searchQuery.v = this.state.volume;
-    this.props.onSearchSubmit(searchQuery);
-  }
-
   handleSearchChange(e) {
     e.preventDefault();
     this.setState({ query: "", volume: 0 });
     this.props.handleSearchChange();
   }
 
+  handleSearchSubmit(e) {
+    e.preventDefault();
+    let searchQuery = {};
+    searchQuery.q = this.state.query;
+    searchQuery.v = this.state.volume;
+    this.props.onSearchSubmit(searchQuery);
+    $("input[name='query']").focus();
+  }
+
   render() {
     let volumes = this.props.volumesWithStartDate.map(volume =>
       <option value={volume.volume}>Volume {volume.volume} {volume.publishDate}</option>
     );
-    let cancelButton = null;
-    if (this.props.isSearchActive) {
-      cancelButton = <button className="form-control btn btn-default"
-                      onClick={this.handleSearchChange}>Cancel</button>
-    }
 
     return (
       <div>
-        <form className="form-inline">
+        <form onSubmit={this.handleSearchSubmit}>
           <div className="input-group">
-            <span className="input-group-addon"><span className="glyphicon glyphicon-search"></span></span>
             <input type="text" className="form-control" name="query" value={this.state.query}
               onChange={this.handleQueryChange} placeholder="Search..."/>
+              <span className="input-group-btn">
+                <button className="btn btn-primary" onClick={this.handleSearchSubmit}>
+                <span className="glyphicon glyphicon-search"></span></button>
+              </span>
           </div>
+          <div className="vertical-spacer"></div>
           <select name="volume" className="form-control" value={this.state.volume} onChange={this.handleVolumeChange}>
             <option value="0">All Volumes</option>
             {volumes}
           </select>
-          <button className="form-control btn btn-primary" onClick={this.onSearchSubmit}>Search</button>
-          {cancelButton}
+          <div className="vertical-spacer"></div>
         </form>
       </div>
     )
@@ -418,15 +448,16 @@ class Journal extends React.Component {
     return (
       <div>
         <div id={this.props.journal.day + "-" + this.props.journal.user.firstName}
-          className="journal panel panel-default">
-          <div className="panel-heading">
-            <h2 className="panel-title text-uppercase">
+        className="anchor"></div>
+        <div className="journal panel panel-default">
+          <div className="panel-heading text-uppercase">
+            <h4>
               Day {this.props.journal.day} | {this.props.journal.publishDate}
               {updateButton}
-            </h2>
-            <h4 className="panel-title">
-              Posted by: {this.props.journal.user.firstName} {this.props.journal.user.lastName}
             </h4>
+            <h5>
+              Posted by: {this.props.journal.user.firstName} {this.props.journal.user.lastName}
+            </h5>
           </div>
           <div className="panel-body">
             {contents}
@@ -455,9 +486,10 @@ class SpecialEventsList extends React.Component {
 
     return (
       <div>
+        <div id="outline" className="anchor"></div>
         <div className="panel panel-default">
-          <div id="outline" className="panel-heading text-uppercase">
-            <h2 className="panel-title">Special Events Outline</h2>
+          <div className="panel-heading text-uppercase">
+            <h4>Special Events Outline</h4>
           </div>
           <div className="panel-body">
             {events}
