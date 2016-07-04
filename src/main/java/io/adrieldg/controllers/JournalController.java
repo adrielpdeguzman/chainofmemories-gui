@@ -19,14 +19,14 @@ public class JournalController {
   @Autowired
   private JournalService journalService;
 
-  @RequestMapping(path = {"", "v", "v/"}, method = RequestMethod.GET)
+  @RequestMapping(path = {"", "v", "v/", "volume", "volume/"}, method = RequestMethod.GET)
   String index() {
     int currentVolume = journalService.getCurrentVolume();
     logger.debug("Entered journals/volume mapping at " + currentVolume);
-    return "redirect:/journals/v/" + currentVolume;
+    return "redirect:/journals/volume/" + currentVolume;
   }
 
-  @RequestMapping("v/{volume}")
+  @RequestMapping("volume/{volume}")
   String volume(@PathVariable Integer volume, Model model) {
     model.addAttribute("volume", volume);
     return "journals/index";
