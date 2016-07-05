@@ -274,8 +274,11 @@ class App extends React.Component {
             </div>
           </div>
           <div className="col-md-9">
-            <JournalList journals={this.state.journals} onJournalUpdate={this.handleUpdateDialogShow}
-              principal={this.state.principal}/>
+            <JournalList
+              journals={this.state.journals}
+              onJournalUpdate={this.handleUpdateDialogShow}
+              principal={this.state.principal}
+              isSearchActive={this.state.isSearchActive} />
             {specialEventsListComponent}
           </div>
         </div>
@@ -411,9 +414,11 @@ class JournalList extends React.Component {
   render() {
     let journals = this.props.journals.map(journal =>
       <Journal
-        key={journal._links.self.href} journal={journal}
+        key={journal._links.self.href}
+        journal={journal}
         onJournalUpdate={this.props.onJournalUpdate}
-        principal={this.props.principal} />
+        principal={this.props.principal}
+        isSearchActive={this.props.isSearchActive} />
     );
 
     return (
@@ -440,7 +445,7 @@ class Journal extends React.Component {
     let events = splitNewLineAndEncloseWithTagWithClass(this.props.journal.specialEvents, "li");
     let contents = splitNewLineAndEncloseWithTagWithClass(this.props.journal.contents, "p");
     let updateButton = null;
-    if (this.props.principal == this.props.journal.user.username) {
+    if (this.props.principal == this.props.journal.user.username && !this.props.isSearchActive) {
       updateButton = <button onClick={this.handleModalShow} className="btn btn-default pull-right"
               data-toggle="modal" data-target="#update-dialog"><span className="glyphicon glyphicon-edit"></span></button>
     }
