@@ -1,5 +1,7 @@
+global:
+  anniversary: 2013-12-07
 spring:
   messages:
     basename: messages
   profiles:
-    active: dev
+    active: staging

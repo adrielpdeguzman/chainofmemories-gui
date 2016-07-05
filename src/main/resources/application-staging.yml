@@ -1,0 +1,13 @@
+logging:
+  level:
+    io.adrieldg: warn
+global:
+  apiUrl: http://chainofmemories.dev:18080/api/v1/
+server:
+  port: 8080
+oauth2:
+  clientId: chainofmemories-client
+  clientSecret: keyblade
+  accessTokenUri: oauth/token
+  grantType: password
+  scope: read,write,trust
