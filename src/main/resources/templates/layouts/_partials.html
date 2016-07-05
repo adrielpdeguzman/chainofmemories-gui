@@ -25,7 +25,9 @@
     <div class="collapse navbar-collapse"
         id="bs-example-navbar-collapse-1">
       <ul sec:authorize="isAuthenticated()" class="nav navbar-nav">
-        <li><a href="#" th:href="@{/journals}">Journals</a></li>
+        <li><a href="#" th:href="@{/journals}"
+            th:classappend="${#httpServletRequest.getRequestURI().startsWith('/journals') ? 'active' : ''}">
+          Journals</a></li>
         <li>
           <form method="POST" th:action="@{/logout}"
               accept-charset="UTF-8" role="form">
@@ -37,7 +39,9 @@
       </ul>
 
       <ul sec:authorize="isAnonymous()" class="nav navbar-nav">
-        <li><a href="#" th:href="@{/login}">Login <span
+        <li><a href="#" th:href="@{/login}"
+            th:classappend="${#httpServletRequest.getRequestURI() == '/login' ? 'active' : ''}">Login
+          <span
             class="sr-only">(current)</span></a></li>
       </ul>
     </div>
