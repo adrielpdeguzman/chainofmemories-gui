@@ -1,0 +1,11 @@
+logging:
+  level:
+    io.adrieldg: info
+global:
+  apiUrl: https://chainofmemories-api.herokuapp.com/api/v1/
+oauth2:
+  clientId: chainofmemories-client
+  clientSecret: keyblade
+  accessTokenUri: oauth/token
+  grantType: password
+  scope: read,write,trust

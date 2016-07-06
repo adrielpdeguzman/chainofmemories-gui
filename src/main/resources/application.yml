@@ -4,4 +4,4 @@ spring:
   messages:
     basename: messages
   profiles:
-    active: staging
+    active: production
