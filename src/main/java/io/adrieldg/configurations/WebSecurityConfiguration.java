@@ -1,12 +1,5 @@
 package io.adrieldg.configurations;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +13,13 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -44,12 +44,12 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   protected void configure(HttpSecurity http) throws Exception {
     /*@formatter:off*/
     http.authorizeRequests()
-        .antMatchers("/", "/changelogs")
+        .antMatchers("/", "/changelog")
         .permitAll()
         .anyRequest().fullyAuthenticated()
         .and()
       .formLogin()
-        .successHandler(addAccessTokenToCookieAfterAuthenticationSucess())
+        .successHandler(addAccessTokenToCookieAfterAuthenticationSuccess())
         .loginPage("/login")
         .failureUrl("/login?error")
         .permitAll()
@@ -62,7 +62,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   }
 
   @Bean
-  public AuthenticationSuccessHandler addAccessTokenToCookieAfterAuthenticationSucess() {
+  public AuthenticationSuccessHandler addAccessTokenToCookieAfterAuthenticationSuccess() {
     return new SavedRequestAwareAuthenticationSuccessHandler() {
 
       @Override
