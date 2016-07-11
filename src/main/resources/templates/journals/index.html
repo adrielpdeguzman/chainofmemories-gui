@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-    layout:decorator="layouts/default">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="layouts/default">
 <head>
-  <title th:text="${'Journals Vol. ' + volume}"></title>
+    <title th:text="${'Journals Vol. ' + volume}"></title>
 </head>
 <body>
 <div layout:fragment="content">
-  <div id="react" th:attr="data-volume=${volume}"></div>
-  <script type="text/babel" src="#" th:src="@{/js/journals.js}"></script>
+    <div id="react" th:attr="data-volume=${volume}"></div>
+    <script type="text/babel" src="#" th:src="@{/js/journals.js}"></script>
 </div>
 </body>
 </html>

@@ -1,12 +1,5 @@
 package io.adrieldg.configurations;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,35 +14,37 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 
-@Configuration
-@EnableWebSecurity
-public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
+import java.io.IOException;
 
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-  @Autowired
-  private CustomAuthenticationProvider authProvider;
+@Configuration @EnableWebSecurity public class WebSecurityConfiguration
+		extends WebSecurityConfigurerAdapter {
 
-  @Override
-  protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-    auth.authenticationProvider(authProvider);
-  }
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-  @Override
-  public void configure(WebSecurity web) throws Exception {
-    web.ignoring().antMatchers("/js/**", "/css/**", "/img/**", "/webjars/**");
-  }
+	@Autowired private CustomAuthenticationProvider authProvider;
 
-  @Override
-  protected void configure(HttpSecurity http) throws Exception {
-    /*@formatter:off*/
+	@Override protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		auth.authenticationProvider(authProvider);
+	}
+
+	@Override public void configure(WebSecurity web) throws Exception {
+		web.ignoring().antMatchers("/js/**", "/css/**", "/img/**", "/webjars/**");
+	}
+
+	@Override protected void configure(HttpSecurity http) throws Exception {
+	/*@formatter:off*/
     http.authorizeRequests()
-        .antMatchers("/", "/changelogs")
+        .antMatchers("/", "/changelog")
         .permitAll()
         .anyRequest().fullyAuthenticated()
         .and()
       .formLogin()
-        .successHandler(addAccessTokenToCookieAfterAuthenticationSucess())
+        .successHandler(addAccessTokenToCookieAfterAuthenticationSuccess())
         .loginPage("/login")
         .failureUrl("/login?error")
         .permitAll()
@@ -59,19 +54,18 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         .logoutSuccessUrl("/?logout")
         .permitAll();
     /*@formatter:on*/
-  }
+	}
 
-  @Bean
-  public AuthenticationSuccessHandler addAccessTokenToCookieAfterAuthenticationSucess() {
-    return new SavedRequestAwareAuthenticationSuccessHandler() {
+	@Bean public AuthenticationSuccessHandler addAccessTokenToCookieAfterAuthenticationSuccess() {
+		return new SavedRequestAwareAuthenticationSuccessHandler() {
 
-      @Override
-      public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-          Authentication authentication) throws IOException, ServletException {
-        response.addCookie(new Cookie("chainofmemories_access_token",
-            authProvider.getRestTemplate().getAccessToken().getValue()));
-        super.onAuthenticationSuccess(request, response, authentication);
-      }
-    };
-  }
+			@Override public void onAuthenticationSuccess(HttpServletRequest request,
+					HttpServletResponse response, Authentication authentication)
+					throws IOException, ServletException {
+				response.addCookie(new Cookie("chainofmemories_access_token",
+						authProvider.getRestTemplate().getAccessToken().getValue()));
+				super.onAuthenticationSuccess(request, response, authentication);
+			}
+		};
+	}
 }

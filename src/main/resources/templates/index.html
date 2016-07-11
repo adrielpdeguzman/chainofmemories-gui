@@ -1,55 +1,56 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-    layout:decorator="layouts/default">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="layouts/default">
 <head>
-  <title>Home</title>
+    <title>Home</title>
 </head>
 <body>
 <div layout:fragment="content">
-  <div class="alert alert-info alert-dismissible" role="alert"
-      th:if="${logout}">
-    <span th:text="#{info.logout-success}"></span><a href="#"
-      class="close" data-dismiss="alert"
-      aria-label="close">&times;</a>
-  </div>
-  <div class="jumbotron">
-    <h1>Chain of Memories</h1>
-    <p>Where memories are cherished and kept forever ~</p>
-  </div>
+    <div class="alert alert-info alert-dismissible" role="alert"
+         th:if="${logout}">
+        <span th:text="#{info.logout-success}"></span><a href="#"
+                                                         class="close"
+                                                         data-dismiss="alert"
+                                                         aria-label="close">&times;</a>
+    </div>
+    <div class="jumbotron">
+        <h1>Chain of Memories</h1>
+        <p>Where memories are cherished and kept forever ~</p>
+    </div>
 
-  <div class="row">
-    <div class="col-md-4">
-      <h3>Journals</h3>
-      <p>Re-visit the memoires of the past, chapter by chapter in
-        this section! Here, we'll find those forgotten conversations
-        and events, as detailed as possible!</p>
-      <p>
-        <a href="#" th:href="@{/journals}" class="btn btn-primary">View
-          Journals &raquo;</a>
-      </p>
+    <div class="row">
+        <div class="col-md-4">
+            <h3>Journals</h3>
+            <p>Re-visit the memoires of the past, chapter by chapter in
+                this section! Here, we'll find those forgotten conversations
+                and events, as detailed as possible!</p>
+            <p>
+                <a href="#" th:href="@{/journals}" class="btn btn-primary">View
+                    Journals &raquo;</a>
+            </p>
+        </div>
+        <div class="col-md-4 hidden">
+            <h3>Messages</h3>
+            <p>Catch those simple, yet memorable text messages! Have you
+                forgotten a small fact that could affect your relationship?
+                Head over here and have a review!</p>
+            <p>
+                <a href="#" th:href="@{#}" class="btn btn-default">View
+                    Messages &raquo;</a>
+            </p>
+        </div>
+        <div class="col-md-4 hidden">
+            <h3>Photos</h3>
+            <p>A picture conveys a thousand words! View all those happy
+                moments, grouped by certain events and venues! Let's walk
+                across memory lane!</p>
+            <p>
+                <a class="btn btn-default" href="#" th:href="@{#}"
+                   role="button">View Photos &raquo;</a>
+            </p>
+        </div>
     </div>
-    <div class="col-md-4 hidden">
-      <h3>Messages</h3>
-      <p>Catch those simple, yet memorable text messages! Have you
-        forgotten a small fact that could affect your relationship?
-        Head over here and have a review!</p>
-      <p>
-        <a href="#" th:href="@{#}" class="btn btn-default">View
-          Messages &raquo;</a>
-      </p>
-    </div>
-    <div class="col-md-4 hidden">
-      <h3>Photos</h3>
-      <p>A picture conveys a thousand words! View all those happy
-        moments, grouped by certain events and venues! Let's walk
-        across memory lane!</p>
-      <p>
-        <a class="btn btn-default" href="#" th:href="@{#}"
-            role="button">View Photos &raquo;</a>
-      </p>
-    </div>
-  </div>
 </div>
 </body>
 </html>

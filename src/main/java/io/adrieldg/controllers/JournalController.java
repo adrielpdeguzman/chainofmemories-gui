@@ -11,24 +11,20 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import io.adrieldg.services.JournalService;
 
-@Controller
-@RequestMapping("/journals")
-public class JournalController {
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
+@Controller @RequestMapping("/journals") public class JournalController {
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-  @Autowired
-  private JournalService journalService;
+	@Autowired private JournalService journalService;
 
-  @RequestMapping(path = {"", "v", "v/", "volume", "volume/"}, method = RequestMethod.GET)
-  String index() {
-    int currentVolume = journalService.getCurrentVolume();
-    logger.debug("Entered journals/volume mapping at " + currentVolume);
-    return "redirect:/journals/volume/" + currentVolume;
-  }
+	@RequestMapping(path = { "", "v", "v/", "volume",
+			"volume/" }, method = RequestMethod.GET) String index() {
+		int currentVolume = journalService.getCurrentVolume();
+		logger.debug("Entered journals/volume mapping at " + currentVolume);
+		return "redirect:/journals/volume/" + currentVolume;
+	}
 
-  @RequestMapping("volume/{volume}")
-  String volume(@PathVariable Integer volume, Model model) {
-    model.addAttribute("volume", volume);
-    return "journals/index";
-  }
+	@RequestMapping("volume/{volume}") String volume(@PathVariable Integer volume, Model model) {
+		model.addAttribute("volume", volume);
+		return "journals/index";
+	}
 }

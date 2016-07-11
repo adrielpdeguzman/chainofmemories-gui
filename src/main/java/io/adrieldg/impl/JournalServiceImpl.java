@@ -9,20 +9,16 @@ import org.springframework.stereotype.Component;
 
 import io.adrieldg.services.JournalService;
 
-@Component
-public class JournalServiceImpl implements JournalService {
+@Component public class JournalServiceImpl implements JournalService {
 
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
-  private final String BASE_URL = "journals/";
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	private final String BASE_URL = "journals/";
 
-  @Autowired
-  @Qualifier("myRestTemplate")
-  private OAuth2RestOperations restTemplate;
+	@Autowired @Qualifier("myRestTemplate") private OAuth2RestOperations restTemplate;
 
-  @Override
-  public Integer getCurrentVolume() {
-    int currentVolume =
-        restTemplate.getForEntity(BASE_URL + "/search/getCurrentVolume", Integer.class).getBody();
-    return currentVolume;
-  }
+	@Override public Integer getCurrentVolume() {
+		int currentVolume = restTemplate
+				.getForEntity(BASE_URL + "/search/getCurrentVolume", Integer.class).getBody();
+		return currentVolume;
+	}
 }

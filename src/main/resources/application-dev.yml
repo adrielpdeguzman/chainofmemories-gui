@@ -1,13 +1,10 @@
 logging:
   level:
     io.adrieldg: DEBUG
-
 global:
-  apiUrl: http://localhost:18080/
-
+  apiUrl: http://localhost:18080/api/v1/
 server:
   port: 8080
-
 oauth2:
   clientId: chainofmemories-client
   clientSecret: keyblade
