@@ -2,8 +2,7 @@ package io.adrieldg.services;
 
 import org.springframework.stereotype.Service;
 
-@Service
-public interface JournalService {
+@Service public interface JournalService {
 
-  Integer getCurrentVolume();
+	Integer getCurrentVolume();
 }

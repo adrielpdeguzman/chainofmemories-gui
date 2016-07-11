@@ -21,28 +21,23 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@Configuration
-@EnableWebSecurity
-public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
+@Configuration @EnableWebSecurity public class WebSecurityConfiguration
+		extends WebSecurityConfigurerAdapter {
 
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-  @Autowired
-  private CustomAuthenticationProvider authProvider;
+	@Autowired private CustomAuthenticationProvider authProvider;
 
-  @Override
-  protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-    auth.authenticationProvider(authProvider);
-  }
+	@Override protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		auth.authenticationProvider(authProvider);
+	}
 
-  @Override
-  public void configure(WebSecurity web) throws Exception {
-    web.ignoring().antMatchers("/js/**", "/css/**", "/img/**", "/webjars/**");
-  }
+	@Override public void configure(WebSecurity web) throws Exception {
+		web.ignoring().antMatchers("/js/**", "/css/**", "/img/**", "/webjars/**");
+	}
 
-  @Override
-  protected void configure(HttpSecurity http) throws Exception {
-    /*@formatter:off*/
+	@Override protected void configure(HttpSecurity http) throws Exception {
+	/*@formatter:off*/
     http.authorizeRequests()
         .antMatchers("/", "/changelog")
         .permitAll()
@@ -59,19 +54,18 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         .logoutSuccessUrl("/?logout")
         .permitAll();
     /*@formatter:on*/
-  }
+	}
 
-  @Bean
-  public AuthenticationSuccessHandler addAccessTokenToCookieAfterAuthenticationSuccess() {
-    return new SavedRequestAwareAuthenticationSuccessHandler() {
+	@Bean public AuthenticationSuccessHandler addAccessTokenToCookieAfterAuthenticationSuccess() {
+		return new SavedRequestAwareAuthenticationSuccessHandler() {
 
-      @Override
-      public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-          Authentication authentication) throws IOException, ServletException {
-        response.addCookie(new Cookie("chainofmemories_access_token",
-            authProvider.getRestTemplate().getAccessToken().getValue()));
-        super.onAuthenticationSuccess(request, response, authentication);
-      }
-    };
-  }
+			@Override public void onAuthenticationSuccess(HttpServletRequest request,
+					HttpServletResponse response, Authentication authentication)
+					throws IOException, ServletException {
+				response.addCookie(new Cookie("chainofmemories_access_token",
+						authProvider.getRestTemplate().getAccessToken().getValue()));
+				super.onAuthenticationSuccess(request, response, authentication);
+			}
+		};
+	}
 }

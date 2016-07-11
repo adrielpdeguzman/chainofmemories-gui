@@ -1,37 +1,39 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-    layout:decorator="layouts/default">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="layouts/default">
 <head>
-  <title>Login</title>
+    <title>Login</title>
 </head>
 <body>
 <div layout:fragment="content">
-  <form method="POST" action="" th:action="@{/login}"
-      th:object="${loginCredentials}" accept-charset="UTF-8" role="form"
-      class="text-center col-md-4 col-md-offset-4">
-    <div class="alert alert-danger alert-dismissible" role="alert"
-        th:if="${error}">
-      [[#{errors.invalid-credentials}]]<a href="#"
-        class="close" data-dismiss="alert"
-        aria-label="close">&times;</a>
-    </div>
+    <form method="POST" action="" th:action="@{/login}"
+          th:object="${loginCredentials}" accept-charset="UTF-8" role="form"
+          class="text-center col-md-4 col-md-offset-4">
+        <div class="alert alert-danger alert-dismissible" role="alert"
+             th:if="${error}">
+            [[#{errors.invalid-credentials}]]<a href="#"
+                                                class="close" data-dismiss="alert"
+                                                aria-label="close">&times;</a>
+        </div>
 
-    <div class="form-group">
-      <label for="username">Username</label> <input
-        class="form-control" required="required"
-        placeholder="Username" th:field="*{username}" autofocus="true"/>
-    </div>
+        <div class="form-group">
+            <label for="username">Username</label> <input
+                class="form-control" required="required"
+                placeholder="Username" th:field="*{username}" autofocus="true"/>
+        </div>
 
-    <div class="form-group">
-      <label for="password">Password</label> <input type="password"
-        class="form-control" required="required"
-        placeholder="Password" th:field="*{password}"/>
-    </div>
+        <div class="form-group">
+            <label for="password">Password</label> <input type="password"
+                                                          class="form-control"
+                                                          required="required"
+                                                          placeholder="Password"
+                                                          th:field="*{password}"/>
+        </div>
 
-    <input class="form-control btn btn-primary" type="submit"
-        value="Login"/>
-  </form>
+        <input class="form-control btn btn-primary" type="submit"
+               value="Login"/>
+    </form>
 </div>
 </body>
 </html>
